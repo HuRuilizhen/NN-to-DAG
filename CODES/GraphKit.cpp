@@ -19,11 +19,11 @@ void GraphKit::dfs(int node, int &currentMemory, int &peakMemory, bool *visit, i
     if (peakMemory < currentMemory)
         peakMemory = currentMemory;
 
-    for (int edge = graph->getEdgeHead(node); graph->isValid(edge); edge = graph->getEdgeNext(edge))
+    for (int edge = graph.getEdgeHead(node); graph.isValid(edge); edge = graph.getEdgeNext(edge))
     {
 
         int from = node;
-        int to = graph->getEdgeTo(edge);
+        int to = graph.getEdgeTo(edge);
 
         if (visit[to])
             continue;
@@ -36,7 +36,7 @@ void GraphKit::dfs(int node, int &currentMemory, int &peakMemory, bool *visit, i
 
 void GraphKit::load(Graph graph)
 {
-    this->graph = new Graph(graph);
+    this->graph = graph;
     inDegree = new int[graph.getNumNodes()];
     inSum = new int[graph.getNumNodes()];
     outSum = new int[graph.getNumNodes()];
@@ -80,9 +80,9 @@ void GraphKit::load(Graph graph)
 
 void GraphKit::runDfs()
 {
-    int *copyInDegree = new int[graph->getNumNodes()];
-    bool *visit = new bool[graph->getNumNodes()];
-    for (int node = 0; node < graph->getNumNodes(); node++)
+    int *copyInDegree = new int[graph.getNumNodes()];
+    bool *visit = new bool[graph.getNumNodes()];
+    for (int node = 0; node < graph.getNumNodes(); node++)
     {
         copyInDegree[node] = inDegree[node];
         visit[node] = false;
@@ -113,6 +113,8 @@ int GraphKit::getResult()
 }
 void GraphKit::printResult()
 {
+    std::cout << std::endl;
     std::cout << "DFS Result: " << dfsResult << std::endl;
     std::cout << "Result: " << result << std::endl;
+    std::cout << std::endl;
 }

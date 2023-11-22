@@ -6,7 +6,7 @@
 class GraphKit
 {
 private:
-    Graph *graph;
+    Graph graph;
     int *inDegree;
     int *inSum;
     int *outSum;
@@ -16,15 +16,24 @@ private:
     int dfsResult;
     int result;
 
+    void load(Graph graph);
     void dfs(int node, int &currentMemory, int &peakMemory, bool *visit, int *copyIndegree);
 
 public:
+    /*
+    Construction method to initialize graph date of GraphKit
+    */
     GraphKit();
     GraphKit(Graph graph);
 
-    void load(Graph graph);
+    /*
+    the method to run DFS and recode the result of the peak memory
+    */
     void runDfs();
 
+    /*
+    the method to get or print the result
+    */
     int getDfsResult();
     int getResult();
     void printResult();
