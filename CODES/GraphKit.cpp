@@ -20,6 +20,7 @@ void GraphKit::load(Graph graph)
     numStartNodes = 0;
     result = -1;
     dfsResult = -1;
+    greedyResult = -1;
 
     for (int node = 0; node < graph.getNumNodes(); node++)
     {
@@ -55,58 +56,6 @@ void GraphKit::load(Graph graph)
             startNodes[counter++] = node;
 }
 
-void GraphKit::dfs(int node, int &currentMemory, int &peakMemory, bool *visit, int *copyInDegree)
-{
-    visit[node] = true;
-
-    currentMemory = currentMemory - inSum[node] + outSum[node];
-    if (peakMemory < currentMemory)
-        peakMemory = currentMemory;
-
-    for (int edge = graph.getEdgeHead(node); graph.isValid(edge); edge = graph.getEdgeNext(edge))
-    {
-
-        int from = node;
-        int to = graph.getEdgeTo(edge);
-
-        if (visit[to])
-            continue;
-
-        copyInDegree[to]--;
-        if (copyInDegree[to] == 0)
-            dfs(to, currentMemory, peakMemory, visit, copyInDegree);
-    }
-}
-
-void GraphKit::runDfs()
-{
-    int *copyInDegree = new int[graph.getNumNodes()];
-    bool *visit = new bool[graph.getNumNodes()];
-    for (int node = 0; node < graph.getNumNodes(); node++)
-    {
-        copyInDegree[node] = inDegree[node];
-        visit[node] = false;
-    }
-
-    int currentMemory = 0;
-    int peakMemory = 0;
-
-    for (int index = 0; index < numStartNodes; index++)
-    {
-        dfs(startNodes[index], currentMemory, peakMemory, visit, copyInDegree);
-    }
-    dfsResult = peakMemory;
-    if (result == -1)
-        result = dfsResult;
-    else if (result > dfsResult)
-        result = dfsResult;
-}
-
-int GraphKit::getDfsResult()
-{
-    return dfsResult;
-}
-
 int GraphKit::getResult()
 {
     return result;
@@ -115,7 +64,9 @@ int GraphKit::getResult()
 void GraphKit::printResult()
 {
     std::cout << std::endl;
-    std::cout << "DFS Result: " << dfsResult << std::endl;
-    std::cout << "Result: " << result << std::endl;
+    std::cout << "DFS Result:\t " << dfsResult << std::endl;
+    std::cout << "Greedy Result:\t " << greedyResult << std::endl;
+    std::cout << std::endl;
+    std::cout << "Result:\t " << result << std::endl;
     std::cout << std::endl;
 }

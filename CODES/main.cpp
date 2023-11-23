@@ -18,6 +18,7 @@ int main(int argc, char const *argv[])
 
     GraphKit graphKit(graph);
     graphKit.runDfs();
+    graphKit.runGreedy();
     graphKit.printResult();
 
     return 0;
