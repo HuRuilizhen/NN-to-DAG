@@ -97,9 +97,15 @@ public:
     void runDfs();
 
     /*
+    the method to run greedy algorithm and recode the result of the peak memory
+    */
+    void runGreedy();
+
+    /*
     the method to get or print the result
     */
     int getDfsResult();
+    int getGreedyResult();
     int getResult();
     void printResult();
 };
