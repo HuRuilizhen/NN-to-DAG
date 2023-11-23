@@ -55,7 +55,7 @@ public:
         for (int edge = getEdgeHead(node); isValid(edge); edge=getEdgeNext(edge))
         {
             int from = node;
-            int to = getEdgeWeight(edge);
+            int to = getEdgeTo(edge);
             int weight = getEdgeWeight(edge);
         }
 
