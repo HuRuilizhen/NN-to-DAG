@@ -15,6 +15,7 @@ private:
 
     int dfsResult;
     int greedyResult;
+    int dpResult;
     int result;
 
     void load(Graph graph);
@@ -43,6 +44,7 @@ public:
     */
     int getDfsResult();
     int getGreedyResult();
+    int getDpResult();
     int getResult();
     void printResult();
 };

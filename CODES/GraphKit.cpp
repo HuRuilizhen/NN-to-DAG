@@ -21,6 +21,7 @@ void GraphKit::load(Graph graph)
     result = -1;
     dfsResult = -1;
     greedyResult = -1;
+    dpResult = -1;
 
     for (int node = 0; node < graph.getNumNodes(); node++)
     {
@@ -66,6 +67,7 @@ void GraphKit::printResult()
     std::cout << std::endl;
     std::cout << "DFS Result:\t " << dfsResult << std::endl;
     std::cout << "Greedy Result:\t " << greedyResult << std::endl;
+    std::cout << "DP Result:\t" << dpResult << std::endl;
     std::cout << std::endl;
     std::cout << "Result:\t " << result << std::endl;
     std::cout << std::endl;
