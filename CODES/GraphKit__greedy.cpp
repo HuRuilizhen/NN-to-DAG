@@ -21,7 +21,11 @@ void GraphKit::greedy(int &currentMemory, int &peakMemory, int *copyIndegree)
     for (int index = 0; index < numStartNodes; index++)
     {
         int node = startNodes[index];
-        elementQueue.push({node, outSum[node] - inSum[node]});
+        Element element;
+        element.node = node;
+        element.delta = outSum[node] - inSum[node];
+        elementQueue.push(element);
+        //elementQueue.push({node, outSum[node] - inSum[node]});
     }
 
     while (!elementQueue.empty())
@@ -31,17 +35,24 @@ void GraphKit::greedy(int &currentMemory, int &peakMemory, int *copyIndegree)
         int node = element.node;
         int delta = element.delta;
 
-        currentMemory += delta;
+        //currentMemory += delta;
+        currentMemory += outSum[node];
         if (currentMemory > peakMemory)
             peakMemory = currentMemory;
-
+        currentMemory -= inSum[node];
         for (int edge = graph.getEdgeHead(node); graph.isValid(edge); edge = graph.getEdgeNext(edge))
         {
             int to = graph.getEdgeTo(edge);
 
             copyIndegree[to]--;
             if (copyIndegree[to] == 0)
-                elementQueue.push({to, outSum[to] - inSum[to]});
+            {
+                Element element;
+                element.node = to;
+                element.delta = outSum[to] - inSum[to];
+                elementQueue.push(element);
+            }
+                //elementQueue.push({to, outSum[to] - inSum[to]});
         }
     }
 }
