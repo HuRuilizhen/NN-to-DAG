@@ -51,3 +51,8 @@ int GraphKit::getDfsMemory()
 {
     return dfsMemory;
 }
+
+double GraphKit::getDfsTime()
+{
+    return dfsTime;
+}

@@ -83,3 +83,8 @@ int GraphKit::getGreedyMemory()
 {
     return greedyMemory;
 }
+
+double GraphKit::getGreedyTime()
+{
+    return greedyTime;
+}

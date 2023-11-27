@@ -104,9 +104,13 @@ public:
     /*
     the method to get or print the result
     */
-    int getDfsResult();
-    int getGreedyResult();
-    int getResult();
+    int getDfsMemory();
+    double getDfsTime();
+    int getGreedyMemory();
+    double getGreedyTime();
+    int getDpMemory();
+    double getDpTime();
+    int getMemory();
     void printResult();
 };
 ```
