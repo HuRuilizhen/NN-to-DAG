@@ -1,12 +1,14 @@
 #include "GraphKit.h"
-#include<iostream>
+
+#include <iostream>
+#include <time.h>
 
 void GraphKit::dfs(int node, int &currentMemory, int &peakMemory, int *copyInDegree)
 {
 
     currentMemory = currentMemory + outSum[node];
     if (peakMemory < currentMemory)
-        peakMemory = currentMemory; 
+        peakMemory = currentMemory;
 
     currentMemory = currentMemory - inSum[node];
 
@@ -29,19 +31,23 @@ void GraphKit::runDfs()
     int currentMemory = 0;
     int peakMemory = 0;
 
+    time_t startTime = clock();
     for (int index = 0; index < numStartNodes; index++)
     {
         dfs(startNodes[index], currentMemory, peakMemory, copyInDegree);
     }
+    time_t endTime = clock();
 
-    dfsResult = peakMemory;
-    if (result == -1)
-        result = dfsResult;
-    else if (result > dfsResult)
-        result = dfsResult;
+    dfsTime = (double)(endTime - startTime) / CLOCKS_PER_SEC;
+
+    dfsMemory = peakMemory;
+    if (memory == -1)
+        memory = dfsMemory;
+    else if (memory > dfsMemory)
+        memory = dfsMemory;
 }
 
-int GraphKit::getDfsResult()
+int GraphKit::getDfsMemory()
 {
-    return dfsResult;
+    return dfsMemory;
 }

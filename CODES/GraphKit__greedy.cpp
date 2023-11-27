@@ -2,6 +2,7 @@
 
 #include <queue>
 #include <iostream>
+#include <time.h>
 
 void GraphKit::greedy(int &currentMemory, int &peakMemory, int *copyIndegree)
 {
@@ -57,6 +58,7 @@ void GraphKit::greedy(int &currentMemory, int &peakMemory, int *copyIndegree)
 
 void GraphKit::runGreedy()
 {
+
     int *copyInDegree = new int[graph.getNumNodes()];
     for (int node = 0; node < graph.getNumNodes(); node++)
         copyInDegree[node] = inDegree[node];
@@ -64,16 +66,20 @@ void GraphKit::runGreedy()
     int currentMemory = 0;
     int peakMemory = 0;
 
+    time_t startTime = clock();
     greedy(currentMemory, peakMemory, copyInDegree);
+    time_t endTime = clock();
 
-    greedyResult = peakMemory;
-    if (result == -1)
-        result = greedyResult;
-    else if (result > greedyResult)
-        result = greedyResult;
+    greedyTime = (double)(endTime - startTime) / CLOCKS_PER_SEC;
+
+    greedyMemory = peakMemory;
+    if (memory == -1)
+        memory = greedyMemory;
+    else if (memory > greedyMemory)
+        memory = greedyMemory;
 }
 
-int GraphKit::getGreedyResult()
+int GraphKit::getGreedyMemory()
 {
-    return greedyResult;
+    return greedyMemory;
 }

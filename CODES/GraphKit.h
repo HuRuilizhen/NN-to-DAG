@@ -13,12 +13,19 @@ private:
     int *startNodes;
     int numStartNodes;
 
-    int dfsResult;
-    int greedyResult;
-    int dpResult;
-    int result;
+    int maximumPeak;
+    int dfsMemory;
+    double dfsTime;
+    int greedyMemory;
+    double greedyTime;
+    int dpMemory;
+    double dpTime;
+    int memory;
 
     void load(Graph graph);
+
+    void maxcut();
+
     void dfs(int node, int &currentMemory, int &peakMemory, int *copyIndegree);
     void greedy(int &currentMemory, int &peakMemory, int *copyIndegree);
 
@@ -42,10 +49,10 @@ public:
     /*
     the method to get or print the result
     */
-    int getDfsResult();
-    int getGreedyResult();
-    int getDpResult();
-    int getResult();
+    int getDfsMemory();
+    int getGreedyMemory();
+    int getDpMemory();
+    int getMemory();
     void printResult();
 };
 
