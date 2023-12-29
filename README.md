@@ -6,8 +6,11 @@
 
 - Compute the peak memory through different algorithms
   - Normal DFS
+  - Inverse DFS
   - Greedy Algorithm
   - Dynamic Progaramming
+- Compute theoretical worst-case memory peak
+  - Maxcut Algorithm
 - Compute the shortest run time under the given constrain of memory
 
 ---
@@ -39,6 +42,11 @@ public:
     int getNumEdges();
 
     /*
+    Setter of edgeWeight
+    */
+    void setEdgeWeight(int edge, int newWeight);
+
+    /*
     Used to add a directed edge to the class
     from: id of beginning node of the new edge
     to: id of ending node of the new edge
@@ -46,11 +54,10 @@ public:
     */
     void addEdge(int from, int to, int weight);
 
-
     /*
     The following method are used to Traverse all the contiguous edges of a node
-    
-    
+
+
     for loop structure will be like:
         for (int edge = getEdgeHead(node); isValid(edge); edge=getEdgeNext(edge))
         {
@@ -67,7 +74,6 @@ public:
     int getEdgeWeight(int edge);
     bool isValid(int edge);
 
-    
     /*
     Print information of all edges have been stored
     */
@@ -86,30 +92,43 @@ private:
 
 public:
     /*
-    Construction method to initialize graph date of GraphKit
+    construction method to initialize graph date of GraphKit
     */
     GraphKit();
     GraphKit(Graph graph);
 
     /*
-    the method to run DFS and recode the result of the peak memory
+    the method to solve maxcut to get the maximum peak memory
     */
-    void runDfs();
+    void runMaxcut();
 
     /*
-    the method to run greedy algorithm and recode the result of the peak memory
+    the method to run algorithms and recode the results of the peak memory
     */
+    void runDfs();
+    void runIdfs();
     void runGreedy();
+    void runDp();
 
     /*
     the method to get or print the result
     */
     int getDfsMemory();
     double getDfsTime();
+    void printDfsSequence();
+
+    int getIdfsMemory();
+    double getIdfsTime();
+    void printIdfsSequence();
+
     int getGreedyMemory();
     double getGreedyTime();
+    void printGreedySequence();
+
     int getDpMemory();
     double getDpTime();
+    void printDpSequence();
+
     int getMemory();
     void printResult();
 };
