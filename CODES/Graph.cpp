@@ -39,6 +39,11 @@ int Graph::getNumEdges()
     return numEdges;
 }
 
+void Graph::setEdgeWeight(int edge, int newWeight)
+{
+    edgeWeight[edge] = newWeight;
+}
+
 void Graph::addEdge(int from, int to, int weight)
 {
     edgeTo[total] = to;

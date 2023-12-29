@@ -28,6 +28,11 @@ public:
     int getNumEdges();
 
     /*
+    Setter of edgeWeight
+    */
+    void setEdgeWeight(int edge, int newWeight);
+
+    /*
     Used to add a directed edge to the class
     from: id of beginning node of the new edge
     to: id of ending node of the new edge

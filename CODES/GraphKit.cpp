@@ -37,13 +37,16 @@ void GraphKit::load(Graph graph)
     Calculate graph data
     */
     inDegree = new int[graph.getNumNodes()];
+    outDegree = new int[graph.getNumNodes()];
     inSum = new int[graph.getNumNodes()];
     outSum = new int[graph.getNumNodes()];
     numStartNodes = 0;
+    numEndNodes = 0;
 
     for (int node = 0; node < graph.getNumNodes(); node++)
     {
         inDegree[node] = 0;
+        outDegree[node] = 0;
         inSum[node] = 0;
         outSum[node] = 0;
     }
@@ -59,20 +62,31 @@ void GraphKit::load(Graph graph)
             inSum[to] += weight;
             outSum[from] += weight;
             inDegree[to]++;
+            outDegree[from]++;
         }
     }
 
     for (int node = 0; node < graph.getNumNodes(); node++)
-        if (inDegree[node] == 0)
+    {
+        if (inDegree[node] == 0 && outDegree[node] != 0)
             numStartNodes++;
+        if (outDegree[node] == 0 && inDegree[node] != 0)
+            numEndNodes++;
+    }
 
     startNodes = new int[numStartNodes];
-    int counter = 0;
+    endNodes = new int[numEndNodes];
+
+    int startNodesCounter = 0;
+    int endNodesCounter = 0;
 
     for (int node = 0; node < graph.getNumNodes(); node++)
-        if (inDegree[node] == 0)
-
-            startNodes[counter++] = node;
+    {
+        if (inDegree[node] == 0 && outDegree[node] != 0)
+            startNodes[startNodesCounter++] = node;
+        if (outDegree[node] == 0 && inDegree[node] != 0)
+            endNodes[endNodesCounter++] = node;
+    }
 }
 
 int GraphKit::getMemory()
@@ -96,6 +110,6 @@ void GraphKit::printResult()
     std::cout << std::endl;
 
     std::cout << std::setw(16) << "Maximum Peak" << std::setw(16) << maximumPeak << std::endl;
-    std::cout << std::setw(16) << "Memory: " << std::setw(16) << memory << std::endl;
+    std::cout << std::setw(16) << "Best Peak" << std::setw(16) << memory << std::endl;
     std::cout << std::endl;
 }

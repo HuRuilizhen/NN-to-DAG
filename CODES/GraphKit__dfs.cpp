@@ -1,16 +1,13 @@
 #include "GraphKit.h"
 
-#include <iostream>
 #include <time.h>
 
 void GraphKit::dfs(int node, int &currentMemory, int &peakMemory, int *copyInDegree)
 {
 
-    currentMemory = currentMemory + outSum[node];
+    currentMemory += outSum[node] - inSum[node];
     if (peakMemory < currentMemory)
         peakMemory = currentMemory;
-
-    currentMemory = currentMemory - inSum[node];
 
     for (int edge = graph.getEdgeHead(node); graph.isValid(edge); edge = graph.getEdgeNext(edge))
     {

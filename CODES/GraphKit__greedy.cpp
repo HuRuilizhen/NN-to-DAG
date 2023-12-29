@@ -1,7 +1,6 @@
 #include "GraphKit.h"
 
 #include <queue>
-#include <iostream>
 #include <time.h>
 
 void GraphKit::greedy(int &currentMemory, int &peakMemory, int *copyIndegree)
@@ -35,10 +34,9 @@ void GraphKit::greedy(int &currentMemory, int &peakMemory, int *copyIndegree)
         int node = element.node;
         int delta = element.delta;
 
-        currentMemory += outSum[node];
+        currentMemory += delta;
         if (currentMemory > peakMemory)
             peakMemory = currentMemory;
-        currentMemory -= inSum[node];
 
         for (int edge = graph.getEdgeHead(node); graph.isValid(edge); edge = graph.getEdgeNext(edge))
         {

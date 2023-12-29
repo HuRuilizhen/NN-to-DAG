@@ -1,4 +1,5 @@
 #include <iostream>
+#include <time.h>
 #include "Graph.h"
 #include "GraphKit.h"
 
@@ -6,6 +7,7 @@ int main(int argc, char const *argv[])
 {
     int n, m;
 
+    time_t startTime = clock();
     std::cin >> n >> m;
     Graph graph(n, m);
 
@@ -15,8 +17,12 @@ int main(int argc, char const *argv[])
         std::cin >> u >> v >> w;
         graph.addEdge(u, v, w);
     }
+    time_t endTime = clock();
+
+    std::cout << "Loading Time:\t" << (double)(endTime - startTime) / CLOCKS_PER_SEC << std::endl;
 
     GraphKit graphKit(graph);
+    graphKit.runMaxcut();
     graphKit.runDfs();
     graphKit.runGreedy();
     graphKit.printResult();

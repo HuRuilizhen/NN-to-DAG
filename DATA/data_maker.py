@@ -1,9 +1,9 @@
 import random
 
-NUM_NODES = 10000
-NUM_EDGES = 100000
+NUM_NODES = 20
+NUM_EDGES = 100
 WEIGHT_RANGE = 1000
-RANDOM_SEED = 184351357
+RANDOM_SEED = 544513
 
 if RANDOM_SEED != -1:
     random.seed(RANDOM_SEED)
@@ -12,6 +12,9 @@ if RANDOM_SEED != -1:
 def edgeGenerator():
     u = random.randrange(0, NUM_NODES)
     v = random.randrange(0, NUM_NODES)
+    while v == u:
+        v = random.randrange(0, NUM_NODES)
+
     w = random.randrange(0, WEIGHT_RANGE)
 
     if u > v:

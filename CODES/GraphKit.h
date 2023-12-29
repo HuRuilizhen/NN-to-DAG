@@ -8,10 +8,13 @@ class GraphKit
 private:
     Graph graph;
     int *inDegree;
+    int *outDegree;
     int *inSum;
     int *outSum;
     int *startNodes;
+    int *endNodes;
     int numStartNodes;
+    int numEndNodes;
 
     int maximumPeak;
     int dfsMemory;
@@ -24,27 +27,37 @@ private:
 
     void load(Graph graph);
 
-    void maxcut();
+    /*
+    the methods of maxflow to get maximum peak memory
+    */
+    bool bfs(int s, int t, Graph *newGraph, int *depth);
+    int dinic(int node, int flow, int s, int t, Graph *newGraph, int *depth);
 
+    /*
+    algorithms to get the peak memory
+    */
     void dfs(int node, int &currentMemory, int &peakMemory, int *copyIndegree);
     void greedy(int &currentMemory, int &peakMemory, int *copyIndegree);
+    void dp();
 
 public:
     /*
-    Construction method to initialize graph date of GraphKit
+    construction method to initialize graph date of GraphKit
     */
     GraphKit();
     GraphKit(Graph graph);
 
     /*
-    the method to run DFS and recode the result of the peak memory
+    the method to solve maxcut to get the maximum peak memory
     */
-    void runDfs();
+    void runMaxcut();
 
     /*
-    the method to run greedy algorithm and recode the result of the peak memory
+    the method to run algorithms and recode the results of the peak memory
     */
+    void runDfs();
     void runGreedy();
+    void runDp();
 
     /*
     the method to get or print the result
