@@ -19,8 +19,13 @@ private:
     int maximumPeak;
     int dfsMemory;
     double dfsTime;
+    int *dfsSequence;
+    int idfsMemory;
+    double idfsTime;
+    int *idfsSequence;
     int greedyMemory;
     double greedyTime;
+    int *greedySequence;
     int dpMemory;
     double dpTime;
     int memory;
@@ -36,7 +41,8 @@ private:
     /*
     algorithms to get the peak memory
     */
-    void dfs(int node, int &currentMemory, int &peakMemory, int *copyIndegree);
+    void dfs(int node, int &currentMemory, int &peakMemory, int *copyIndegree, int &cnt);
+    void idfs(int node, int &currentMemory, int &peakMemory, int *copyIndegree, int &cnt, Graph *newGraph);
     void greedy(int &currentMemory, int &peakMemory, int *copyIndegree);
     void dp();
 
@@ -56,6 +62,7 @@ public:
     the method to run algorithms and recode the results of the peak memory
     */
     void runDfs();
+    void runIdfs();
     void runGreedy();
     void runDp();
 
@@ -64,10 +71,20 @@ public:
     */
     int getDfsMemory();
     double getDfsTime();
+    void printDfsSequence();
+
+    int getIdfsMemory();
+    double getIdfsTime();
+    void printIdfsSequence();
+
     int getGreedyMemory();
     double getGreedyTime();
+    void printGreedySequence();
+
     int getDpMemory();
     double getDpTime();
+    void printDpSequence();
+
     int getMemory();
     void printResult();
 };

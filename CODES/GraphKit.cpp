@@ -105,6 +105,7 @@ void GraphKit::printResult()
     std::cout << std::endl;
 
     std::cout << std::setw(16) << "DFS Result" << std::setw(16) << dfsMemory << std::setw(16) << dfsTime << std::endl;
+    std::cout << std::setw(16) << "IDFS Result" << std::setw(16) << idfsMemory << std::setw(16) << idfsTime << std::endl;
     std::cout << std::setw(16) << "Greedy Result" << std::setw(16) << greedyMemory << std::setw(16) << greedyTime << std::endl;
     std::cout << std::setw(16) << "DP Result" << std::setw(16) << dpMemory << std::setw(16) << dpTime << std::endl;
     std::cout << std::endl;

@@ -2,6 +2,7 @@
 
 #include <queue>
 #include <time.h>
+#include <iostream>
 
 void GraphKit::greedy(int &currentMemory, int &peakMemory, int *copyIndegree)
 {
@@ -27,6 +28,7 @@ void GraphKit::greedy(int &currentMemory, int &peakMemory, int *copyIndegree)
         elementQueue.push(element);
     }
 
+    int cnt = -1;
     while (!elementQueue.empty())
     {
         Element element = elementQueue.top();
@@ -34,6 +36,7 @@ void GraphKit::greedy(int &currentMemory, int &peakMemory, int *copyIndegree)
         int node = element.node;
         int delta = element.delta;
 
+        *(greedySequence + ++cnt) = node;
         currentMemory += delta;
         if (currentMemory > peakMemory)
             peakMemory = currentMemory;
@@ -41,7 +44,6 @@ void GraphKit::greedy(int &currentMemory, int &peakMemory, int *copyIndegree)
         for (int edge = graph.getEdgeHead(node); graph.isValid(edge); edge = graph.getEdgeNext(edge))
         {
             int to = graph.getEdgeTo(edge);
-
             copyIndegree[to]--;
             if (copyIndegree[to] == 0)
             {
@@ -56,7 +58,7 @@ void GraphKit::greedy(int &currentMemory, int &peakMemory, int *copyIndegree)
 
 void GraphKit::runGreedy()
 {
-
+    greedySequence = new int[graph.getNumNodes()];
     int *copyInDegree = new int[graph.getNumNodes()];
     for (int node = 0; node < graph.getNumNodes(); node++)
         copyInDegree[node] = inDegree[node];
@@ -85,4 +87,17 @@ int GraphKit::getGreedyMemory()
 double GraphKit::getGreedyTime()
 {
     return greedyTime;
+}
+
+void GraphKit::printGreedySequence()
+{
+    std::cout << "greedy sequence: {";
+    for (int i = 0; i < graph.getNumNodes(); i++)
+    {
+        std::cout << *(greedySequence + i);
+        if (i != graph.getNumNodes() - 1)
+            std::cout << ", ";
+    }
+    std::cout << "}" << std::endl
+              << std::endl;
 }

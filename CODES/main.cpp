@@ -22,10 +22,13 @@ int main(int argc, char const *argv[])
     std::cout << "Loading Time:\t" << (double)(endTime - startTime) / CLOCKS_PER_SEC << std::endl;
 
     GraphKit graphKit(graph);
-    graphKit.runMaxcut();
     graphKit.runDfs();
+    graphKit.runIdfs();
     graphKit.runGreedy();
     graphKit.printResult();
+    graphKit.printDfsSequence();
+    graphKit.printIdfsSequence();
+    graphKit.printGreedySequence();
 
     return 0;
 }
