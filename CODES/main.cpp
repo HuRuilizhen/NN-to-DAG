@@ -25,10 +25,8 @@ int main(int argc, char const *argv[])
     graphKit.runDfs();
     graphKit.runIdfs();
     graphKit.runGreedy();
+    graphKit.runDp();
     graphKit.printResult();
-    graphKit.printDfsSequence();
-    graphKit.printIdfsSequence();
-    graphKit.printGreedySequence();
 
     return 0;
 }

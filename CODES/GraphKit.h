@@ -17,17 +17,23 @@ private:
     int numEndNodes;
 
     int maximumPeak;
+
     int dfsMemory;
     double dfsTime;
     int *dfsSequence;
+
     int idfsMemory;
     double idfsTime;
     int *idfsSequence;
+
     int greedyMemory;
     double greedyTime;
     int *greedySequence;
+
     int dpMemory;
     double dpTime;
+    int *dpSequence;
+
     int memory;
 
     void load(Graph graph);
@@ -44,7 +50,7 @@ private:
     void dfs(int node, int &currentMemory, int &peakMemory, int *copyIndegree, int &cnt);
     void idfs(int node, int &currentMemory, int &peakMemory, int *copyIndegree, int &cnt, Graph *newGraph);
     void greedy(int &currentMemory, int &peakMemory, int *copyIndegree);
-    void dp();
+    void dp(int &currentMemory, int &peakMemory);
 
 public:
     /*

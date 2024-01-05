@@ -17,6 +17,38 @@
 
 ### Project Code Structure
 
+```
+
+|   README.md
+|
+|
++---CODES                           Code Repo
+|       Graph.cpp
+|       Graph.h                     Related to storing graph
+|       GraphKit.cpp
+|       GraphKit.h                  Related to compute peak memory
+|       GraphKit__dfs.cpp
+|       GraphKit__dp.cpp
+|       GraphKit__greedy.cpp
+|       GraphKit__idfs.cpp
+|       GraphKit__maxcut.cpp
+|       main.cpp
+|       makefile
+|
++---DATA                            Related to generating random digraph data
+|       data_maker.py
+|       Graph.in
+|
+\---REFERENCE                       Reference articles
+        MLSys~.pdf
+        Paral~.pdf
+
+```
+
+--- 
+
+### Code Implementation
+
 - **Graph.h**: The class used to store graphs, using the method of chain forward stars
 
 ```c++
