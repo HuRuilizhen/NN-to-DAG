@@ -26,6 +26,7 @@ int main(int argc, char const *argv[])
     graphKit.runIdfs();
     graphKit.runGreedy();
     graphKit.runDp();
+    graphKit.runMaxcut();
     graphKit.printResult();
 
     return 0;

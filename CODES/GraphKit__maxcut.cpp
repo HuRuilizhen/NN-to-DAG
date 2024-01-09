@@ -128,7 +128,6 @@ void GraphKit::runMaxcut()
             continue;
 
         int contribution = flowSum - newGraph->getEdgeWeight(edge ^ 1);
-        std::cout << contribution << std::endl;
         maxcut += contribution;
     }
 

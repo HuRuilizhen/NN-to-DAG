@@ -18,7 +18,7 @@ void GraphKit::dp(int &currentMemory, int &peakMemory)
     };
 
     std::vector<std::map<std::set<int>, Memoization>> memoizations;
-    memoizations.resize(graph.getNumNodes());
+    memoizations.resize(graph.getNumNodes() + 1);
 
     std::set<int> initZeroIndegreeNodes;
     std::vector<int> initSchedual;
@@ -29,7 +29,7 @@ void GraphKit::dp(int &currentMemory, int &peakMemory)
     }
     memoizations[0].emplace(initZeroIndegreeNodes, Memoization{initSchedual, 0, 0});
 
-    for (int i = 0; i < graph.getNumNodes() - 1; i++)
+    for (int i = 0; i < graph.getNumNodes(); i++)
     {
         std::map<std::set<int>, Memoization>::iterator it;
         for (it = memoizations[i].begin(); it != memoizations[i].end(); it++)
@@ -37,11 +37,16 @@ void GraphKit::dp(int &currentMemory, int &peakMemory)
             std::set<int> zeroIndegreeNodes = it->first;
             Memoization memoization = it->second;
             std::vector<int> schedual = memoization.schedual;
-            int current_memory = memoization.current_memory;
-            int peak_memory = memoization.peak_memory;
 
             for (auto node : zeroIndegreeNodes)
             {
+                bool flag = false;
+                for (int index = 0; index < schedual.size(); index++)
+                    if (node == schedual[index])
+                        flag = true;
+                if (flag)
+                    continue;
+
                 std::set<int> newZeroIndegreeNodes;
                 std::vector<int> newSchedual = schedual;
                 newSchedual.push_back(node);
@@ -55,21 +60,38 @@ void GraphKit::dp(int &currentMemory, int &peakMemory)
                     {
                         int to = graph.getEdgeTo(edge);
                         copyInDegree[to]--;
-                        if (!copyInDegree[to])
-                            newZeroIndegreeNodes.insert(to);
                     }
+
+                for (int from = 0; from < graph.getNumNodes(); from++)
+                {
+
+                    if (!copyInDegree[from])
+                        newZeroIndegreeNodes.insert(from);
+                }
 
                 int new_current_memory = memoization.current_memory - inSum[node] + outSum[node];
                 int new_peak_memory = std::max(memoization.peak_memory, new_current_memory);
 
-                if (memoizations[i + 1].find(newZeroIndegreeNodes) == memoizations[i + 1].end() || memoizations[i + 1].at(newZeroIndegreeNodes).peak_memory > new_peak_memory)
+                if (memoizations[i + 1].find(newZeroIndegreeNodes) == memoizations[i + 1].end())
+                {
                     memoizations[i + 1].emplace(newZeroIndegreeNodes, Memoization{newSchedual, new_current_memory, new_peak_memory});
+                }
+
+                if (memoizations[i + 1].at(newZeroIndegreeNodes).peak_memory > new_peak_memory)
+                {
+
+                    memoizations[i + 1].find(newZeroIndegreeNodes)->second = Memoization{newSchedual, new_current_memory, new_peak_memory};
+                }
             }
         }
     }
 
     std::set<int> finalZeroIndegreeNodes;
-    peakMemory = memoizations[graph.getNumNodes() - 1].size();
+
+    for (int node = 0; node < graph.getNumNodes(); node++)
+        finalZeroIndegreeNodes.insert(node);
+
+    peakMemory = memoizations[graph.getNumNodes()].at(finalZeroIndegreeNodes).peak_memory;
 }
 
 void GraphKit::runDp()
