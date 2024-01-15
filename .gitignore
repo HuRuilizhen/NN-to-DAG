@@ -4,6 +4,4 @@
 
 **/main.exe
 
-/DATA/*
-
-! /DATA/data_maker.py
+*.in
