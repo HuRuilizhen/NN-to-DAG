@@ -93,6 +93,7 @@ public:
 
     int getMemory();
     void printResult();
+    void printResultCSV();
 };
 
 #endif // __GRAPHKIT_H__
