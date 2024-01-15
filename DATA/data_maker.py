@@ -13,14 +13,19 @@ def edgeGenerator(NUM_NODES, WEIGHT_RANGE):
     if u > v:
         u, v = v, u
 
-    return f"{u} {v} {w}\n"
+    return f"{u} {v} {w}"
 
 
 def graphGenerator(NUM_NODES, NUM_EDGES, WEIGHT_RANGE, FILENAME):
-    with open("Graph.in", "w", encoding="utf8") as f:
-        f.write(f"{NUM_NODES} {NUM_EDGES}\n")
+    if FILENAME != "":
+        with open(FILENAME, "w", encoding="utf8") as f:
+            f.write(f"{NUM_NODES} {NUM_EDGES}\n")
+            for line in range(NUM_EDGES):
+                f.write(f"{edgeGenerator(NUM_NODES, WEIGHT_RANGE)}\n")
+    else:
+        print(f"{NUM_NODES} {NUM_EDGES}")
         for line in range(NUM_EDGES):
-            f.write(edgeGenerator(NUM_NODES, WEIGHT_RANGE))
+            print(f"{edgeGenerator(NUM_NODES, WEIGHT_RANGE)}")
 
 
 if __name__ == "__main__":
@@ -28,7 +33,7 @@ if __name__ == "__main__":
     NUM_EDGES = 100
     WEIGHT_RANGE = 1000
     RANDOM_SEED = -1
-    FILENAME = "graph.in"
+    FILENAME = ""
 
     paser = argparse.ArgumentParser()
     paser.add_argument("-NUM_NODES", dest="NUM_NODES", required=False)
@@ -47,7 +52,7 @@ if __name__ == "__main__":
     if args.RANDOM_SEED:
         RANDOM_SEED = int(args.RANDOM_SEED)
     if args.FILENAME:
-        FILENAME = int(args.FILENAME)
+        FILENAME = args.FILENAME
     if RANDOM_SEED != -1:
         random.seed(RANDOM_SEED)
 
