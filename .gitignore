@@ -3,3 +3,7 @@
 **/main
 
 **/main.exe
+
+/DATA/*
+
+! /DATA/data_maker.py
