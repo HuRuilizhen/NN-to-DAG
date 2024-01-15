@@ -12,7 +12,8 @@ void GraphKit::dp(int &currentMemory, int &peakMemory)
 {
     struct Memoization
     {
-        std::vector<int> schedual;
+        std::vector<int> schedule;
+        std::vector<int> indegree;
         int current_memory;
         int peak_memory;
     };
@@ -20,69 +21,68 @@ void GraphKit::dp(int &currentMemory, int &peakMemory)
     std::vector<std::map<std::set<int>, Memoization>> memoizations;
     memoizations.resize(graph.getNumNodes() + 1);
 
-    std::set<int> initZeroIndegreeNodes;
-    std::vector<int> initSchedual;
+    /*
+        Initialize Memoization related variables
+    */
+    std::set<int> initCandidate;
+    std::vector<int> initSchedule;
+    std::vector<int> initIndegree;
     for (int index = 0; index < numStartNodes; index++)
     {
         int startNode = startNodes[index];
-        initZeroIndegreeNodes.insert(startNode);
+        initCandidate.insert(startNode);
     }
-    memoizations[0].emplace(initZeroIndegreeNodes, Memoization{initSchedual, 0, 0});
+    for (int node = 0; node < graph.getNumNodes(); node++)
+        initIndegree.push_back(inDegree[node]);
+    memoizations[0].emplace(initCandidate, Memoization{initSchedule, initIndegree, 0, 0});
 
+    /*
+        Execute dynamic programming
+    */
     for (int i = 0; i < graph.getNumNodes(); i++)
     {
         std::map<std::set<int>, Memoization>::iterator it;
         for (it = memoizations[i].begin(); it != memoizations[i].end(); it++)
         {
-            std::set<int> zeroIndegreeNodes = it->first;
+            std::set<int> currentCandidate = it->first;
             Memoization memoization = it->second;
-            std::vector<int> schedual = memoization.schedual;
+            std::vector<int> currentSchedule = memoization.schedule;
+            std::vector<int> currentIndegree = memoization.indegree;
 
-            std::set<int> candidateNode = zeroIndegreeNodes;
-            for (auto node : schedual)
-                candidateNode.erase(node);
-
-            for (auto node : candidateNode)
+            for (auto node : currentCandidate)
             {
-                std::set<int> newZeroIndegreeNodes;
-                std::vector<int> newSchedual = schedual;
-                newSchedual.push_back(node);
+                std::set<int> newCandidate = currentCandidate;
+                std::vector<int> newSchedule = currentSchedule;
+                std::vector<int> newIndegree = currentIndegree;
+                newCandidate.erase(node);
+                newSchedule.push_back(node);
 
-                int *copyInDegree = new int[graph.getNumNodes()];
-                std::memcpy(copyInDegree, inDegree, sizeof(int) * graph.getNumNodes());
-
-                for (auto from : newSchedual)
-                    for (int edge = graph.getEdgeHead(from); graph.isValid(edge); edge = graph.getEdgeNext(edge))
-                    {
-                        int to = graph.getEdgeTo(edge);
-                        copyInDegree[to]--;
-                    }
-
-                for (int from = 0; from < graph.getNumNodes(); from++)
+                for (int edge = graph.getEdgeHead(node); graph.isValid(edge); edge = graph.getEdgeNext(edge))
                 {
-                    if (!copyInDegree[from])
-                        newZeroIndegreeNodes.insert(from);
+                    int to = graph.getEdgeTo(edge);
+                    if (--newIndegree[to])
+                        continue;
+                    newCandidate.insert(to);
                 }
 
                 int new_current_memory = memoization.current_memory - inSum[node] + outSum[node];
                 int new_peak_memory = std::max(memoization.peak_memory, new_current_memory);
 
-                if (memoizations[i + 1].find(newZeroIndegreeNodes) == memoizations[i + 1].end())
-                    memoizations[i + 1].emplace(newZeroIndegreeNodes, Memoization{newSchedual, new_current_memory, new_peak_memory});
-                else if (memoizations[i + 1].at(newZeroIndegreeNodes).peak_memory > new_peak_memory)
-                    memoizations[i + 1].find(newZeroIndegreeNodes)->second = Memoization{newSchedual, new_current_memory, new_peak_memory};
+                if (memoizations[i + 1].find(newCandidate) == memoizations[i + 1].end())
+                    memoizations[i + 1].emplace(newCandidate, Memoization{newSchedule, newIndegree, new_current_memory, new_peak_memory});
+                else if (memoizations[i + 1].at(newCandidate).peak_memory > new_peak_memory)
+                    memoizations[i + 1].find(newCandidate)->second = Memoization{newSchedule, newIndegree, new_current_memory, new_peak_memory};
             }
         }
     }
 
-    std::set<int> finalZeroIndegreeNodes;
-    for (int node = 0; node < graph.getNumNodes(); node++)
-        finalZeroIndegreeNodes.insert(node);
-    Memoization finalMemoization = memoizations[graph.getNumNodes()].at(finalZeroIndegreeNodes);
-    std::vector<int> finalSchedual = finalMemoization.schedual;
-
-    std::memcpy(dpSequence, &finalMemoization.schedual[0], sizeof(finalSchedual[0]) * finalSchedual.size());
-
+    /*
+        compile statistics of results
+    */
+    std::set<int> finalCandidate;
+    Memoization finalMemoization = memoizations[graph.getNumNodes()].at(finalCandidate);
+    std::vector<int> finalSchedule = finalMemoization.schedule;
+    std::memcpy(dpSequence, &finalMemoization.schedule[0], sizeof(finalSchedule[0]) * finalSchedule.size());
     peakMemory = finalMemoization.peak_memory;
 }
 

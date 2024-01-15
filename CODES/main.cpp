@@ -27,7 +27,7 @@ int main(int argc, char const *argv[])
     graphKit.runGreedy();
     graphKit.runDp();
     graphKit.printResult();
-    graphKit.printDpSequence();
+    // graphKit.printDpSequence();
 
     return 0;
 }
