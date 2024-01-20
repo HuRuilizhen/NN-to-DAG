@@ -1,0 +1,21 @@
+#! /bin/bash 
+
+RANDOM_SEED=2024
+
+command_generator() 
+{
+    echo python3.6 data_maker.py -NUM_NODES $1 -NUM_EDGES $2 -RANDOM_SEED $3
+}
+
+filename_generator()
+{
+    echo "graph_$1_$2_$3"
+}
+
+for i in {10..99}
+do
+    num_nodes=$i
+    num_edges=$(( $i * 10 ))
+    $(command_generator ${num_nodes} ${num_edges} ${RANDOM_SEED}) > $(filename_generator ${num_nodes} ${num_edges} ${RANDOM_SEED})
+done
+

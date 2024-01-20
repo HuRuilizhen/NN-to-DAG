@@ -40,7 +40,7 @@ if __name__ == "__main__":
     paser.add_argument("-NUM_EDGES", dest="NUM_EDGES", required=False)
     paser.add_argument("-WEIGHT_RANGE", dest="WEIGHT_RANGE", required=False)
     paser.add_argument("-RANDOM_SEED", dest="RANDOM_SEED", required=False)
-    paser.add_argument("-FILENMAE", dest="FILENAME", required=False)
+    paser.add_argument("-FILENAME", dest="FILENAME", required=False)
     args = paser.parse_args()
 
     if args.NUM_NODES:

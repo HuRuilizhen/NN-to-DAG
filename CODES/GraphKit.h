@@ -42,6 +42,7 @@ private:
     the methods of maxflow to get maximum peak memory
     */
     bool bfs(int s, int t, Graph *newGraph, int *depth);
+    Graph *getFlowGraph();
     int dinic(int node, int flow, int s, int t, Graph *newGraph, int *depth);
 
     /*

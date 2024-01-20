@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <queue>
+#include <string.h>
 
 bool GraphKit::bfs(int sourceNode, int sinkNode, Graph *newGraph, int *depth)
 {
@@ -66,10 +67,8 @@ int GraphKit::dinic(int node, int flow, int sourceNode, int sinkNode, Graph *new
     return flow - rest;
 }
 
-void GraphKit::runMaxcut()
+Graph *GraphKit::getFlowGraph()
 {
-    int inf = 0x7fffffff;
-
     int flowSum = 0;
     for (int node = 0; node < graph.getNumNodes(); node++)
         for (int edge = graph.getEdgeHead(node); graph.isValid(edge); edge = graph.getEdgeNext(edge))
@@ -80,21 +79,35 @@ void GraphKit::runMaxcut()
     flowSum++;
 
     Graph *newGraph = new Graph(graph.getNumNodes() + 2, 2 * graph.getNumEdges() + 2 * (numStartNodes + numEndNodes));
+    int *demand = new int[2 * graph.getNumEdges() + 2 * (numStartNodes + numEndNodes)];
+    int *newInSum = new int[graph.getNumNodes() + 2];
+    int *newOutSum = new int[graph.getNumNodes() + 2];
     int sourceNode = graph.getNumNodes();
     int sinkNode = graph.getNumNodes() + 1;
+    memset(demand, 0, sizeof(int) * newGraph->getNumEdges());
+    memset(newInSum, 0, sizeof(int) * newGraph->getNumNodes());
+    memset(newOutSum, 0, sizeof(int) * newGraph->getNumNodes());
 
     for (int index = 0; index < numStartNodes; index++)
     {
         int startNode = startNodes[index];
-        newGraph->addEdge(sourceNode, startNode, inf);
+        newGraph->addEdge(sourceNode, startNode, 1);
         newGraph->addEdge(startNode, sourceNode, 0);
+        demand[newGraph->getEdgeHead(sourceNode)] = 0;
+        demand[newGraph->getEdgeHead(startNode)] = 0;
+        newInSum[startNode]++;
+        newOutSum[sourceNode]++;
     }
 
     for (int index = 0; index < numEndNodes; index++)
     {
         int endNode = endNodes[index];
-        newGraph->addEdge(endNode, sinkNode, inf);
+        newGraph->addEdge(endNode, sinkNode, 1);
         newGraph->addEdge(sinkNode, endNode, 0);
+        demand[newGraph->getEdgeHead(endNode)] = 0;
+        demand[newGraph->getEdgeHead(sinkNode)] = 0;
+        newInSum[endNode]++;
+        newOutSum[sinkNode]++;
     }
 
     for (int node = 0; node < graph.getNumNodes(); node++)
@@ -103,14 +116,29 @@ void GraphKit::runMaxcut()
             int from = node;
             int to = graph.getEdgeTo(edge);
             int weight = graph.getEdgeWeight(edge);
-            newGraph->addEdge(from, to, flowSum - weight);
+            newGraph->addEdge(from, to, 1);
             newGraph->addEdge(to, from, 0);
+            demand[newGraph->getEdgeHead(from)] = weight;
+            demand[newGraph->getEdgeHead(to)] = weight;
+            newOutSum[from]++;
+            newInSum[to]++;
         }
 
+    /* code for getting weights of new graph*/
+
+    return newGraph;
+}
+
+void GraphKit::runMaxcut()
+{
+    Graph *newGraph = getFlowGraph();
     int *depth = new int[newGraph->getNumNodes()];
     for (int node = 0; node < newGraph->getNumNodes(); node++)
         depth[node] = 0;
+    int sourceNode = newGraph->getNumNodes() - 2;
+    int sinkNode = newGraph->getNumNodes() - 1;
 
+    int inf = 0x7fffffff;
     while (bfs(sourceNode, sinkNode, newGraph, depth))
         while (true)
         {
@@ -120,16 +148,7 @@ void GraphKit::runMaxcut()
         }
 
     int maxcut = 0;
-    for (int edge = 0; edge < newGraph->getNumEdges(); edge += 2)
-    {
-        int remainder = newGraph->getEdgeWeight(edge);
-
-        if (remainder)
-            continue;
-
-        int contribution = flowSum - newGraph->getEdgeWeight(edge ^ 1);
-        maxcut += contribution;
-    }
+    /* code for getting maxcut */
 
     maximumPeak = maxcut;
 }

@@ -7,9 +7,15 @@
 #include <vector>
 #include <map>
 #include <queue>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
 
-void GraphKit::dp(int &currentMemory, int &peakMemory)
+namespace GraphKitDp
 {
+    int numThreadsAlive = 0;
+    std::mutex mutex;
+    std::condition_variable conditionVariable;
     struct Memoization
     {
         std::vector<int> schedule;
@@ -18,8 +24,41 @@ void GraphKit::dp(int &currentMemory, int &peakMemory)
         int peak_memory;
     };
 
-    std::vector<std::map<std::set<int>, Memoization>> memoizations;
-    memoizations.resize(graph.getNumNodes() + 1);
+    void workThread(int node, std::set<int> newCandidate, std::vector<int> newSchedule, std::vector<int> newIndegree, std::map<std::set<int>, Memoization> &currentMemoization, int currentMemory, int peakMemory, Graph graph, int *inSum, int *outSum)
+    {
+        numThreadsAlive++;
+        // std::unique_lock<std::mutex> lock(mutex);
+        // lock.unlock();
+
+        newCandidate.erase(node);
+        newSchedule.push_back(node);
+
+        for (int edge = graph.getEdgeHead(node); graph.isValid(edge); edge = graph.getEdgeNext(edge))
+        {
+            int to = graph.getEdgeTo(edge);
+            if (--newIndegree[to])
+                continue;
+            newCandidate.insert(to);
+        }
+
+        int newCurrentMemory = currentMemory - inSum[node] + outSum[node];
+        int newPeakMemory = std::max(peakMemory, newCurrentMemory);
+
+        if (currentMemoization.find(newCandidate) == currentMemoization.end())
+            currentMemoization.emplace(newCandidate, GraphKitDp::Memoization{newSchedule, newIndegree, newCurrentMemory, newPeakMemory});
+        else if (currentMemoization.at(newCandidate).peak_memory > newPeakMemory)
+            currentMemoization.find(newCandidate)->second = GraphKitDp::Memoization{newSchedule, newIndegree, newCurrentMemory, newPeakMemory};
+
+        // lock.lock();
+        numThreadsAlive--;
+        // conditionVariable.notify_all();
+    }
+};
+
+void GraphKit::dp(int &currentMemory, int &peakMemory)
+{
+    std::map<std::set<int>, GraphKitDp::Memoization> lastMemoization;
+    std::map<std::set<int>, GraphKitDp::Memoization> currentMemoization;
 
     /*
         Initialize Memoization related variables
@@ -34,53 +73,45 @@ void GraphKit::dp(int &currentMemory, int &peakMemory)
     }
     for (int node = 0; node < graph.getNumNodes(); node++)
         initIndegree.push_back(inDegree[node]);
-    memoizations[0].emplace(initCandidate, Memoization{initSchedule, initIndegree, 0, 0});
+    lastMemoization.emplace(initCandidate, GraphKitDp::Memoization{initSchedule, initIndegree, 0, 0});
 
     /*
         Execute dynamic programming
     */
     for (int i = 0; i < graph.getNumNodes(); i++)
     {
-        std::map<std::set<int>, Memoization>::iterator it;
-        for (it = memoizations[i].begin(); it != memoizations[i].end(); it++)
+        std::map<std::set<int>, GraphKitDp::Memoization>::iterator it;
+        for (it = lastMemoization.begin(); it != lastMemoization.end(); it++)
         {
             std::set<int> currentCandidate = it->first;
-            Memoization memoization = it->second;
+            GraphKitDp::Memoization memoization = it->second;
             std::vector<int> currentSchedule = memoization.schedule;
             std::vector<int> currentIndegree = memoization.indegree;
+            int currentMemory = memoization.current_memory;
+            int peakMemory = memoization.peak_memory;
 
+            std::vector<std::thread> threads;
             for (auto node : currentCandidate)
-            {
-                std::set<int> newCandidate = currentCandidate;
-                std::vector<int> newSchedule = currentSchedule;
-                std::vector<int> newIndegree = currentIndegree;
-                newCandidate.erase(node);
-                newSchedule.push_back(node);
+                GraphKitDp::workThread(node, currentCandidate, currentSchedule, currentIndegree, currentMemoization, currentMemory, peakMemory, graph, inSum, outSum);
 
-                for (int edge = graph.getEdgeHead(node); graph.isValid(edge); edge = graph.getEdgeNext(edge))
-                {
-                    int to = graph.getEdgeTo(edge);
-                    if (--newIndegree[to])
-                        continue;
-                    newCandidate.insert(to);
-                }
+            // std::unique_lock<std::mutex> lock(GraphKitDp::mutex);
+            // while (GraphKitDp::numThreadsAlive > 0)
+            //     GraphKitDp::conditionVariable.wait(lock);
+            // lock.unlock();
 
-                int new_current_memory = memoization.current_memory - inSum[node] + outSum[node];
-                int new_peak_memory = std::max(memoization.peak_memory, new_current_memory);
-
-                if (memoizations[i + 1].find(newCandidate) == memoizations[i + 1].end())
-                    memoizations[i + 1].emplace(newCandidate, Memoization{newSchedule, newIndegree, new_current_memory, new_peak_memory});
-                else if (memoizations[i + 1].at(newCandidate).peak_memory > new_peak_memory)
-                    memoizations[i + 1].find(newCandidate)->second = Memoization{newSchedule, newIndegree, new_current_memory, new_peak_memory};
-            }
+            // for (auto &thread : threads)
+            //     if (thread.joinable())
+            //         thread.join();
         }
+        lastMemoization = currentMemoization;
+        currentMemoization.clear();
     }
 
     /*
         compile statistics of results
     */
     std::set<int> finalCandidate;
-    Memoization finalMemoization = memoizations[graph.getNumNodes()].at(finalCandidate);
+    GraphKitDp::Memoization finalMemoization = lastMemoization.at(finalCandidate);
     std::vector<int> finalSchedule = finalMemoization.schedule;
     std::memcpy(dpSequence, &finalMemoization.schedule[0], sizeof(finalSchedule[0]) * finalSchedule.size());
     peakMemory = finalMemoization.peak_memory;
