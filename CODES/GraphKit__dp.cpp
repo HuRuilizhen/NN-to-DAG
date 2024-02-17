@@ -45,7 +45,7 @@ namespace GraphKitDp
         return !numThreadsAlive;
     }
 
-    void workThread(std::set<int> currentCandidate, std::vector<int> currentSchedule, std::vector<int> currentIndegree, std::map<std::set<int>, Memoization> &currentMemoization, int currentMemory, int peakMemory, Graph graph, int *inSum, int *outSum)
+    void stageCalculation(std::set<int> currentCandidate, std::vector<int> currentSchedule, std::vector<int> currentIndegree, std::map<std::set<int>, Memoization> &currentMemoization, int currentMemory, int peakMemory, Graph graph, int *inSum, int *outSum)
     {
         numThreadsAliveIncrement();
 
@@ -84,8 +84,11 @@ namespace GraphKitDp
     }
 };
 
-void GraphKit::dp(int &currentMemory, int &peakMemory)
+void GraphKit::dp(int &currentMemory, int &peakMemory, bool multithreading, int calculation)
 {
+    if (calculation < 0)
+        calculation = 0x7fffffff;
+
     std::map<std::set<int>, GraphKitDp::Memoization> lastMemoization;
     std::map<std::set<int>, GraphKitDp::Memoization> currentMemoization;
 
@@ -111,9 +114,31 @@ void GraphKit::dp(int &currentMemory, int &peakMemory)
     {
         std::vector<std::thread> threads;
         std::map<std::set<int>, GraphKitDp::Memoization>::iterator it;
+        std::priority_queue<int> heap;
+        std::set<int> set;
 
         for (it = lastMemoization.begin(); it != lastMemoization.end(); it++)
         {
+            if (heap.size() < calculation)
+                heap.push(it->second.current_memory);
+            else if (heap.top() > it->second.current_memory)
+            {
+                heap.pop();
+                heap.push(it->second.current_memory);
+            }
+        }
+
+        while (heap.size())
+        {
+            set.insert(heap.top());
+            heap.pop();
+        }
+
+        for (it = lastMemoization.begin(); it != lastMemoization.end(); it++)
+        {
+            if (set.find(it->second.current_memory) == set.end())
+                continue;
+
             std::set<int> currentCandidate = it->first;
             GraphKitDp::Memoization memoization = it->second;
             std::vector<int> currentSchedule = memoization.schedule;
@@ -121,15 +146,21 @@ void GraphKit::dp(int &currentMemory, int &peakMemory)
             int currentMemory = memoization.current_memory;
             int peakMemory = memoization.peak_memory;
 
-            threads.emplace_back(GraphKitDp::workThread, currentCandidate, currentSchedule, currentIndegree, std::ref(currentMemoization), currentMemory, peakMemory, graph, inSum, outSum);
+            if (multithreading)
+                threads.emplace_back(GraphKitDp::stageCalculation, currentCandidate, currentSchedule, currentIndegree, std::ref(currentMemoization), currentMemory, peakMemory, graph, inSum, outSum);
+            else
+                GraphKitDp::stageCalculation(currentCandidate, currentSchedule, currentIndegree, currentMemoization, currentMemory, peakMemory, graph, inSum, outSum);
         }
 
-        std::unique_lock<std::mutex> lock(GraphKitDp::mutex);
-        GraphKitDp::conditionVariable.wait(lock);
+        if (multithreading)
+        {
+            std::unique_lock<std::mutex> lock(GraphKitDp::mutex);
+            GraphKitDp::conditionVariable.wait(lock);
 
-        for (auto &thread : threads)
-            if (thread.joinable())
-                thread.join();
+            for (auto &thread : threads)
+                if (thread.joinable())
+                    thread.join();
+        }
 
         lastMemoization = currentMemoization;
         currentMemoization.clear();
@@ -145,7 +176,7 @@ void GraphKit::dp(int &currentMemory, int &peakMemory)
     peakMemory = finalMemoization.peak_memory;
 }
 
-void GraphKit::runDp()
+void GraphKit::runDp(bool multithreading, int calculation)
 {
     dpSequence = new int[graph.getNumNodes()];
 
@@ -153,7 +184,7 @@ void GraphKit::runDp()
     int peakMemory = 0;
 
     time_t startTime = clock();
-    dp(currentMemory, peakMemory);
+    dp(currentMemory, peakMemory, multithreading, calculation);
     time_t endTime = clock();
 
     dpTime = (double)(endTime - startTime) / CLOCKS_PER_SEC;

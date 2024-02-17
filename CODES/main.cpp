@@ -20,7 +20,7 @@ int main(int argc, char const *argv[])
     graphKit.runDfs();
     graphKit.runIdfs();
     graphKit.runGreedy();
-    graphKit.runDp();
+    graphKit.runDp(false, 20);
     graphKit.printResultCSV();
 
     return 0;
