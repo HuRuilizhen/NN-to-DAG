@@ -20,8 +20,12 @@ int main(int argc, char const *argv[])
     graphKit.runDfs();
     graphKit.runIdfs();
     graphKit.runGreedy();
-    graphKit.runDp(false, 20);
-    graphKit.printResultCSV();
+    graphKit.runDp(false, -1);
+    graphKit.printResult();
+
+    graphKit.printDfsSequence();
+    graphKit.printGreedySequence();
+    graphKit.printDpSequence();
 
     return 0;
 }
