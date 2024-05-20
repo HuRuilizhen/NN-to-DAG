@@ -59,6 +59,7 @@ public:
     int getEdgeTo(int edge);
     int getEdgeWeight(int edge);
     bool isValid(int edge);
+    int getweightfromto(int from, int to);
 
     /*
     Print information of all edges have been stored

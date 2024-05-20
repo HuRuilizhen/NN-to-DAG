@@ -3,6 +3,8 @@
 
 #include "Graph.h"
 
+#include <vector>
+
 class GraphKit
 {
 private:
@@ -34,6 +36,9 @@ private:
     double dpTime;
     int *dpSequence;
 
+    int maxcutMemory;
+    
+
     int memory;
 
     void load(Graph graph);
@@ -41,10 +46,7 @@ private:
     /*
     the methods of maxflow to get maximum peak memory
     */
-    bool bfs(int s, int t, Graph *newGraph, int *depth);
-    Graph *getFlowGraph();
-    int dinic(int node, int flow, int s, int t, Graph *newGraph, int *depth);
-
+    
     /*
     algorithms to get the peak memory
     */
@@ -54,6 +56,10 @@ private:
     void dp(int &currentMemory, int &peakMemory, bool multithreading, int calculation);
 
 public:
+    bool bfs(int s, int t, Graph *newGraph, int *depth);
+    void *getFlowGraph(Graph* newgraph, int currentNode, int endNode, std::vector<bool>& visited, std::vector<int>& path, long long& totalWeight);
+    long long dinic(int node, int flow, int s, int t, Graph *newGraph, int *depth);
+
     /*
     construction method to initialize graph date of GraphKit
     */
@@ -64,6 +70,7 @@ public:
     the method to solve maxcut to get the maximum peak memory
     */
     void runMaxcut();
+    std::vector<int> topological_cut; // topological cut C = (S,T). topological_cut contains the nodes of S
 
     /*
     the method to run algorithms and recode the results of the peak memory
@@ -91,6 +98,10 @@ public:
     int getDpMemory();
     double getDpTime();
     void printDpSequence();
+    std::vector<int> getDpSequence();
+
+    int getmaxcutMemory();
+    std::vector<int> RESPECTORDER(std::vector<int> sequential_schedule);
 
     int getMemory();
     void printResult();

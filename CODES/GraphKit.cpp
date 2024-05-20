@@ -94,6 +94,11 @@ int GraphKit::getMemory()
     return memory;
 }
 
+int GraphKit::getmaxcutMemory()
+{
+    return maxcutMemory;
+}
+
 void GraphKit::printResult()
 {
     std::cout.setf(std::ios::left);
@@ -112,21 +117,5 @@ void GraphKit::printResult()
 
     std::cout << std::setw(16) << "Maximum Peak" << std::setw(16) << maximumPeak << std::endl;
     std::cout << std::setw(16) << "Best Peak" << std::setw(16) << memory << std::endl;
-    std::cout << std::endl;
-}
-
-void GraphKit::printResultCSV()
-{
-    std::cout << graph.getNumNodes() << ", ";
-    std::cout << graph.getNumEdges() << ", ";
-    std::cout << dfsMemory << ", ";
-    std::cout << dfsTime << ", ";
-    std::cout << idfsMemory << ", ";
-    std::cout << idfsTime << ", ";
-    std::cout << greedyMemory << ", ";
-    std::cout << greedyTime << ", ";
-    std::cout << dpMemory << ", ";
-    std::cout << dpTime << ", ";
-    std::cout << maximumPeak;
     std::cout << std::endl;
 }

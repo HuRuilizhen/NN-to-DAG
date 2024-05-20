@@ -12,10 +12,10 @@ filename_generator()
     echo "graph_$1_$2_$3"
 }
 
-for i in {10..99}
+for i in {100..999}
 do
     num_nodes=$i
-    num_edges=$(( $i * 10 ))
+    num_edges=$(( $num_nodes * 5 ))
     $(command_generator ${num_nodes} ${num_edges} ${RANDOM_SEED}) > $(filename_generator ${num_nodes} ${num_edges} ${RANDOM_SEED})
 done
 
