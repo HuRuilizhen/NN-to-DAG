@@ -114,7 +114,7 @@ void GraphKit::dp(int &currentMemory, int &peakMemory, bool multithreading, int 
     {
         std::vector<std::thread> threads;
         std::map<std::set<int>, GraphKitDp::Memoization>::iterator it;
-        std::priority_queue<int, std::vector<int>, std::greater<int>> heap;
+        std::priority_queue<int> heap;
         std::set<int> set;
 
         for (it = lastMemoization.begin(); it != lastMemoization.end(); it++)
