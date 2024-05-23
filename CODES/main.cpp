@@ -18,14 +18,10 @@ int main(int argc, char const *argv[])
 
     GraphKit graphKit(graph);
     graphKit.runDfs();
+    std::cout << graphKit.getDfsTime();
+    graphKit.printResult();
     graphKit.runIdfs();
     graphKit.runGreedy();
-    graphKit.runDp(false, -1);
-    graphKit.printResult();
-
-    graphKit.printDfsSequence();
-    graphKit.printGreedySequence();
-    graphKit.printDpSequence();
 
     return 0;
 }

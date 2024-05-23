@@ -20,6 +20,8 @@ GraphKit::GraphKit(Graph graph)
 
     dfsMemory = -1;
     dfsTime = -1;
+    idfsMemory = -1;
+    idfsTime = -1;
     greedyMemory = -1;
     greedyTime = -1;
     dpMemory = -1;
@@ -117,5 +119,21 @@ void GraphKit::printResult()
 
     std::cout << std::setw(16) << "Maximum Peak" << std::setw(16) << maximumPeak << std::endl;
     std::cout << std::setw(16) << "Best Peak" << std::setw(16) << memory << std::endl;
+    std::cout << std::endl;
+}
+
+void GraphKit::printResultCSV()
+{
+    std::cout << graph.getNumNodes() << ", ";
+    std::cout << graph.getNumEdges() << ", ";
+    std::cout << dfsMemory << ", ";
+    std::cout << dfsTime << ", ";
+    std::cout << idfsMemory << ", ";
+    std::cout << idfsTime << ", ";
+    std::cout << greedyMemory << ", ";
+    std::cout << greedyTime << ", ";
+    std::cout << dpMemory << ", ";
+    std::cout << dpTime << ", ";
+    std::cout << maximumPeak;
     std::cout << std::endl;
 }
