@@ -87,7 +87,7 @@ def randWireGraphGenerator(LIST_RANDWIRE_NODES, LIST_RANDWIRE_EDGES , WEIGHT_RAN
         edges.extend(randWireGroupGenerator(NUM_NODES, NUM_EDGES, WEIGHT_RANGE, BIAS))
         BIAS += NUM_NODES
         
-    NUM_NODES = BIAS
+    NUM_NODES = BIAS + 1
     NUM_EDGES = len(edges)
     
     printGraph(NUM_NODES, NUM_EDGES, edges, FILENAME)
@@ -107,7 +107,7 @@ def fcnnGraphGenerator(LIST_FCNN_NODES, WEIGHT_RANGE, FILENAME):
                 
         BIAS += NUM_CURRENT_NODES
 
-    NUM_NODES = BIAS
+    NUM_NODES = sum(LIST_FCNN_NODES)
     NUM_EDGES = len(edges)
     
     printGraph(NUM_NODES, NUM_EDGES, edges, FILENAME)
