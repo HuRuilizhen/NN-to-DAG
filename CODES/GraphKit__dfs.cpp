@@ -37,10 +37,9 @@ void GraphKit::runDfs()
         dfs(startNodes[index], currentMemory, peakMemory, copyInDegree, ++cnt);
     }
     time_t endTime = clock();
-
     dfsTime = (double)(endTime - startTime) / CLOCKS_PER_SEC;
-
     dfsMemory = peakMemory;
+
     if (memory == -1)
         memory = dfsMemory;
     else if (memory > dfsMemory)

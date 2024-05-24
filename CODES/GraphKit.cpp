@@ -96,7 +96,7 @@ int GraphKit::getMemory()
     return memory;
 }
 
-int GraphKit::getmaxcutMemory()
+int GraphKit::getMaxcutMemory()
 {
     return maxcutMemory;
 }

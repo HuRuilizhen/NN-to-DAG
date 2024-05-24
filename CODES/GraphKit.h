@@ -2,6 +2,7 @@
 #define __GRAPHKIT_H__
 
 #include "Graph.h"
+#include <vector>
 
 class GraphKit
 {
@@ -34,8 +35,8 @@ private:
     double dpTime;
     int *dpSequence;
 
+    std::vector<int> topological_cut; // topological cut C = (S,T). topological_cut contains the nodes of S
     int maxcutMemory;
-
     int memory;
 
     void load(Graph graph);
@@ -43,6 +44,9 @@ private:
     /*
     the methods of maxflow to get maximum peak memory
     */
+    bool bfs(int s, int t, Graph *newGraph, int *depth);
+    void *getFlowGraph(Graph *newgraph, int currentNode, int endNode, std::vector<bool> &visited, std::vector<int> &path, long long &totalWeight);
+    long long dinic(int node, int flow, int s, int t, Graph *newGraph, int *depth);
 
     /*
     algorithms to get the peak memory
@@ -66,6 +70,7 @@ public:
     void runIdfs();
     void runGreedy();
     void runDp(bool multithreading, int calculation);
+    void runMaxcut();
 
     /*
     the method to get or print the result
@@ -86,7 +91,8 @@ public:
     double getDpTime();
     void printDpSequence();
 
-    int getmaxcutMemory();
+    int getMaxcutMemory();
+    std::vector<int> RESPECTORDER(std::vector<int> sequential_schedule);
 
     int getMemory();
     void printResult();
