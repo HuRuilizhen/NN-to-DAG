@@ -54,7 +54,7 @@ private:
     void dfs(int node, int &currentMemory, int &peakMemory, int *copyIndegree, int &cnt);
     void idfs(int node, int &currentMemory, int &peakMemory, int *copyIndegree, int &cnt, Graph *newGraph);
     void greedy(int &currentMemory, int &peakMemory, int *copyIndegree);
-    void dp(int &currentMemory, int &peakMemory, bool multithreading, int calculation);
+    void dp(int &currentMemory, int &peakMemory, bool multithreading, bool bound, int calculation);
 
 public:
     /*
@@ -69,7 +69,7 @@ public:
     void runDfs();
     void runIdfs();
     void runGreedy();
-    void runDp(bool multithreading, int calculation);
+    void runDp(bool multithreading, bool bound, int calculation);
     void runMaxcut();
 
     /*

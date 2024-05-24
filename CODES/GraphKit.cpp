@@ -96,11 +96,6 @@ int GraphKit::getMemory()
     return memory;
 }
 
-int GraphKit::getMaxcutMemory()
-{
-    return maxcutMemory;
-}
-
 void GraphKit::printResult()
 {
     std::cout.setf(std::ios::left);

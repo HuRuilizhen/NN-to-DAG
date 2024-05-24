@@ -45,7 +45,7 @@ namespace GraphKitDp
         return !numThreadsAlive;
     }
 
-    void stageCalculation(std::set<int> currentCandidate, std::vector<int> currentSchedule, std::vector<int> currentIndegree, std::map<std::set<int>, Memoization> &currentMemoization, int currentMemory, int peakMemory, Graph graph, int *inSum, int *outSum)
+    void stageCalculation(std::set<int> currentCandidate, std::vector<int> currentSchedule, std::vector<int> currentIndegree, std::map<std::set<int>, Memoization> &currentMemoization, int currentMemory, int peakMemory, Graph graph, int *inSum, int *outSum, int boundPeakMemory)
     {
         numThreadsAliveIncrement();
 
@@ -69,6 +69,9 @@ namespace GraphKitDp
             int newCurrentMemory = currentMemory - inSum[node] + outSum[node];
             int newPeakMemory = std::max(peakMemory, newCurrentMemory);
 
+            if (newPeakMemory > boundPeakMemory)
+                continue;
+
             std::unique_lock<std::mutex> memoizationLock(memoizationMutex);
             if (currentMemoization.find(newCandidate) == currentMemoization.end())
                 currentMemoization.emplace(newCandidate, GraphKitDp::Memoization{newSchedule, newIndegree, newCurrentMemory, newPeakMemory});
@@ -84,10 +87,14 @@ namespace GraphKitDp
     }
 };
 
-void GraphKit::dp(int &currentMemory, int &peakMemory, bool multithreading, int calculation)
+void GraphKit::dp(int &currentMemory, int &peakMemory, bool multithreading, bool bound, int calculation)
 {
     if (calculation < 0)
         calculation = 0x7fffffff;
+
+    int boundPeakMemory = 0x7fffffff;
+    if (bound)
+        boundPeakMemory = memory;
 
     std::map<std::set<int>, GraphKitDp::Memoization> lastMemoization;
     std::map<std::set<int>, GraphKitDp::Memoization> currentMemoization;
@@ -147,9 +154,9 @@ void GraphKit::dp(int &currentMemory, int &peakMemory, bool multithreading, int 
             int peakMemory = memoization.peak_memory;
 
             if (multithreading)
-                threads.emplace_back(GraphKitDp::stageCalculation, currentCandidate, currentSchedule, currentIndegree, std::ref(currentMemoization), currentMemory, peakMemory, graph, inSum, outSum);
+                threads.emplace_back(GraphKitDp::stageCalculation, currentCandidate, currentSchedule, currentIndegree, std::ref(currentMemoization), currentMemory, peakMemory, graph, inSum, outSum, boundPeakMemory);
             else
-                GraphKitDp::stageCalculation(currentCandidate, currentSchedule, currentIndegree, currentMemoization, currentMemory, peakMemory, graph, inSum, outSum);
+                GraphKitDp::stageCalculation(currentCandidate, currentSchedule, currentIndegree, currentMemoization, currentMemory, peakMemory, graph, inSum, outSum, boundPeakMemory);
         }
 
         if (multithreading)
@@ -176,7 +183,7 @@ void GraphKit::dp(int &currentMemory, int &peakMemory, bool multithreading, int 
     peakMemory = finalMemoization.peak_memory;
 }
 
-void GraphKit::runDp(bool multithreading, int calculation)
+void GraphKit::runDp(bool multithreading, bool bound, int calculation)
 {
     dpSequence = new int[graph.getNumNodes()];
 
@@ -184,7 +191,7 @@ void GraphKit::runDp(bool multithreading, int calculation)
     int peakMemory = 0;
 
     time_t startTime = clock();
-    dp(currentMemory, peakMemory, multithreading, calculation);
+    dp(currentMemory, peakMemory, multithreading, bound, calculation);
     time_t endTime = clock();
 
     dpTime = (double)(endTime - startTime) / CLOCKS_PER_SEC;
