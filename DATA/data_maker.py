@@ -1,5 +1,6 @@
 import random
 import argparse
+import networkx as nx
 
 def edgeWeightGenerator(WEIGHT_RANGE):
     return random.randrange(WEIGHT_RANGE[0], WEIGHT_RANGE[1])
@@ -73,7 +74,6 @@ def randWireGroupGenerator(NUM_NODES, NUM_EDGES, WEIGHT_RANGE, BIAS):
             edges.append(edge)
     
     return edges        
-    
 
 
 def randWireGraphGenerator(LIST_RANDWIRE_NODES, LIST_RANDWIRE_EDGES , WEIGHT_RANGE, FILENAME):
@@ -91,7 +91,7 @@ def randWireGraphGenerator(LIST_RANDWIRE_NODES, LIST_RANDWIRE_EDGES , WEIGHT_RAN
     NUM_EDGES = len(edges)
     
     printGraph(NUM_NODES, NUM_EDGES, edges, FILENAME)
-            
+
 def fcnnGraphGenerator(LIST_FCNN_NODES, WEIGHT_RANGE, FILENAME):
     edges = []
     BIAS = 0
@@ -104,14 +104,51 @@ def fcnnGraphGenerator(LIST_FCNN_NODES, WEIGHT_RANGE, FILENAME):
             for v in range(NUM_NEXT_NODES):
                 edge = BIAS + u, BIAS + NUM_CURRENT_NODES + v, edgeWeightGenerator(WEIGHT_RANGE)
                 edges.append(edge)
-                
+
         BIAS += NUM_CURRENT_NODES
 
     NUM_NODES = sum(LIST_FCNN_NODES)
     NUM_EDGES = len(edges)
-    
+
+    printGraph(NUM_NODES, NUM_EDGES, edges, FILENAME)
+
+
+def erGraphGenerator(NUM_NODES, ER_PROBABILITY, WEIGHT_RANGE, FILENAME):
+    edges = []
+    G = nx.erdos_renyi_graph(NUM_NODES, ER_PROBABILITY)
+
+    for u, v in G.edges():
+        if u > v:
+            u, v = v, u
+        edges.append((u, v, edgeWeightGenerator(WEIGHT_RANGE)))
+
+    NUM_EDGES = len(edges)
+    printGraph(NUM_NODES, NUM_EDGES, edges, FILENAME)
+
+def baGraphGenerator(NUM_NODES, BA_INITIAL_NODES, WEIGHT_RANGE, FILENAME):
+    edges = []
+    G = nx.barabasi_albert_graph(NUM_NODES, BA_INITIAL_NODES)
+
+    for u, v in G.edges():
+        if u > v:
+            u, v = v, u
+        edges.append((u, v, edgeWeightGenerator(WEIGHT_RANGE)))
+        
+    NUM_EDGES = len(edges)
     printGraph(NUM_NODES, NUM_EDGES, edges, FILENAME)
     
+def wsGraphGenerator(NUM_NODES, WS_K, WS_PROBABILITY, WEIGHT_RANGE, FILENAME):
+    edges = []
+    G = nx.watts_strogatz_graph(NUM_NODES, WS_K, WS_PROBABILITY)
+
+    for u, v in G.edges():
+        if u > v:
+            u, v = v, u
+        edges.append((u, v, edgeWeightGenerator(WEIGHT_RANGE)))
+        
+    NUM_EDGES = len(edges)
+    printGraph(NUM_NODES, NUM_EDGES, edges, FILENAME)
+
 if __name__ == "__main__":
     
     """ ARGS DEFAULT SETTING """
@@ -123,11 +160,14 @@ if __name__ == "__main__":
     RANDOM_SEED = -1
     FILENAME = ""
     MODE = "Random"
-    MODE_LIST = ["Random", "RandWire", "FCNN"]
+    MODE_LIST = ["Random", "RandWire", "FCNN", "ER", "BA", "WS"]
     LIST_RANDWIRE_NODES = [50, 50, 50]
     LIST_RANDWIRE_EDGES = [100, 100, 100]
     LIST_FCNN_NODES = [20, 20, 20]
-    
+    ER_PROBABILITY = 0.5
+    BA_INITIAL_NODES = 20
+    WS_K = 10
+    WS_PROBABILITY = 0.5
     
     paser = argparse.ArgumentParser()
     paser.add_argument("-NUM_NODES", dest="NUM_NODES", required=False, type=int)
@@ -161,6 +201,33 @@ if __name__ == "__main__":
         type=lambda s: list(map(int, s.split(","))),
     )
 
+    paser.add_argument(
+        "-ER_PROBABILITY",
+        dest="ER_PROBABILITY",
+        required=False,
+        type=float,
+    )
+
+    paser.add_argument(
+        "-BA_INITIAL_NODES",
+        dest="BA_INITIAL_NODES",
+        required=False,
+        type=int,
+    )
+    
+    paser.add_argument(
+        "-WS_K",
+        dest="WS_K",
+        required=False,
+        type=int,
+    )
+    paser.add_argument(
+        "-WS_PROBABILITY",
+        dest="WS_PROBABILITY",
+        required=False,
+        type=float,
+    )
+
     args = paser.parse_args()
     
     
@@ -187,20 +254,34 @@ if __name__ == "__main__":
     if args.NUM_EDGES:
         NUM_EDGES = int(args.NUM_EDGES)
 
-    """ RANDOMWIRE MODE: NUM NODES AND NUM EDGES SETTING  """
+    """ RANDOMWIRE MODE: NUM NODES AND NUM EDGES PER GROUP SETTING  """
     if args.LIST_RANDWIRE_GROUP_NODES:
         LIST_RANDWIRE_NODES = args.LIST_RANDWIRE_GROUP_NODES
     if args.LIST_RANDWIRE_GROUP_EDGES:
         LIST_RANDWIRE_EDGES = args.LIST_RANDWIRE_GROUP_EDGES
 
-    """ FCNN MODE: NUM NODES AND NUM EDGES SETTING  """
+    """ FCNN MODE: NUM NODES PER LAYER SETTING  """
     if args.LIST_FCNN_GROUP_NODES:
         LIST_FCNN_NODES = args.LIST_FCNN_GROUP_NODES
+        
+    """ ER MODE: NUM NODES AND PROBABILITY SETTING  """
+    if args.ER_PROBABILITY:
+        ER_PROBABILITY = float(args.ER_PROBABILITY)
+        
+    """ BA MODE: NUM NODES AND INITIAL NODES SETTING  """
+    if args.BA_INITIAL_NODES:
+        BA_INITIAL_NODES = int(args.BA_INITIAL_NODES)
+        
+    """ WS MODE: NUM NODES, K AND PROBABILITY SETTING  """
+    if args.WS_K:
+        WS_K = int(args.WS_K)
+    if args.WS_PROBABILITY:
+        WS_PROBABILITY = float(args.WS_PROBABILITY)
 
     """ MODE CHOICE """
     if args.MODE:
         MODE = args.MODE
-    if MODE == "Random" or MODE not in ["Random", "RandWire", "FCNN"]:
+    if MODE == "Random" or MODE not in MODE_LIST:
         randomGraphGenerator(NUM_NODES, NUM_EDGES, WEIGHT_RANGE, FILENAME)
     elif MODE == "RandWire":
         randWireGraphGenerator(
@@ -211,3 +292,9 @@ if __name__ == "__main__":
         )
     elif MODE == "FCNN":
         fcnnGraphGenerator(LIST_FCNN_NODES, WEIGHT_RANGE, FILENAME)
+    elif MODE == "ER":
+        erGraphGenerator(NUM_NODES, ER_PROBABILITY, WEIGHT_RANGE, FILENAME)
+    elif MODE == "BA":
+        baGraphGenerator(NUM_NODES, BA_INITIAL_NODES, WEIGHT_RANGE, FILENAME)
+    elif MODE == "WS":
+        wsGraphGenerator(NUM_NODES, WS_K, WS_PROBABILITY, WEIGHT_RANGE, FILENAME)
