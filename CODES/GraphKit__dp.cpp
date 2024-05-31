@@ -183,7 +183,118 @@ void GraphKit::dp(int &currentMemory, int &peakMemory, bool multithreading, bool
     peakMemory = finalMemoization.peak_memory;
 }
 
-void GraphKit::runDp(bool multithreading, bool bound, int calculation)
+int GraphKit::dpSoftBudget(int &currentMemory, int &peakMemory, bool multithreading, bool bound, int calculation, int budget, time_t startTime)
+{
+    if (calculation < 0)
+        calculation = 0x7fffffff;
+
+    int boundPeakMemory = 0x7fffffff;
+    if (bound)
+        boundPeakMemory = memory;
+    budget = std::min(budget, memory);
+
+    std::map<std::set<int>, GraphKitDp::Memoization> lastMemoization;
+    std::map<std::set<int>, GraphKitDp::Memoization> currentMemoization;
+
+    /*
+        Initialize Memoization related variables
+    */
+    std::set<int> initCandidate;
+    std::vector<int> initSchedule;
+    std::vector<int> initIndegree;
+    for (int index = 0; index < numStartNodes; index++)
+    {
+        int startNode = startNodes[index];
+        initCandidate.insert(startNode);
+    }
+    for (int node = 0; node < graph.getNumNodes(); node++)
+        initIndegree.push_back(inDegree[node]);
+    lastMemoization.emplace(initCandidate, GraphKitDp::Memoization{initSchedule, initIndegree, 0, 0});
+
+    /*
+        Execute dynamic programming
+    */
+    for (int i = 0; i < graph.getNumNodes(); i++)
+    {
+        std::vector<std::thread> threads;
+        std::map<std::set<int>, GraphKitDp::Memoization>::iterator it;
+        std::priority_queue<int> heap;
+        std::set<int> set;
+
+        for (it = lastMemoization.begin(); it != lastMemoization.end(); it++)
+        {
+            if (heap.size() < calculation)
+                heap.push(it->second.current_memory);
+            else if (heap.top() > it->second.current_memory)
+            {
+                heap.pop();
+                heap.push(it->second.current_memory);
+            }
+        }
+
+        while (heap.size())
+        {
+            set.insert(heap.top());
+            heap.pop();
+        }
+
+        if (lastMemoization.empty())
+            return NO_SOLUTION;
+
+        for (it = lastMemoization.begin(); it != lastMemoization.end(); it++)
+        {
+            if (set.find(it->second.current_memory) == set.end())
+                continue;
+
+            /* Record current running time */
+            time_t endTime = clock();
+            double runningTime = (double)(endTime - startTime) / CLOCKS_PER_SEC;
+            if (runningTime > maximumTime)
+                return TIMEOUT;
+
+            /*
+                Execute stage calculation
+            */
+
+            std::set<int> currentCandidate = it->first;
+            GraphKitDp::Memoization memoization = it->second;
+            std::vector<int> currentSchedule = memoization.schedule;
+            std::vector<int> currentIndegree = memoization.indegree;
+            int currentMemory = memoization.current_memory;
+            int peakMemory = memoization.peak_memory;
+
+            if (multithreading)
+                threads.emplace_back(GraphKitDp::stageCalculation, currentCandidate, currentSchedule, currentIndegree, std::ref(currentMemoization), currentMemory, peakMemory, graph, inSum, outSum, budget);
+            else
+                GraphKitDp::stageCalculation(currentCandidate, currentSchedule, currentIndegree, currentMemoization, currentMemory, peakMemory, graph, inSum, outSum, budget);
+        }
+
+        if (multithreading)
+        {
+            std::unique_lock<std::mutex> lock(GraphKitDp::mutex);
+            GraphKitDp::conditionVariable.wait(lock);
+
+            for (auto &thread : threads)
+                if (thread.joinable())
+                    thread.join();
+        }
+
+        lastMemoization = currentMemoization;
+        currentMemoization.clear();
+    }
+
+    /*
+        compile statistics of results
+    */
+    std::set<int> finalCandidate;
+    GraphKitDp::Memoization finalMemoization = lastMemoization.at(finalCandidate);
+    std::vector<int> finalSchedule = finalMemoization.schedule;
+    std::memcpy(dpSequence, &finalMemoization.schedule[0], sizeof(finalSchedule[0]) * finalSchedule.size());
+    peakMemory = finalMemoization.peak_memory;
+    return SOLUTION;
+}
+
+void GraphKit::runDp(bool multithreading, bool bound, bool softBudget, int calculation)
 {
     dpSequence = new int[graph.getNumNodes()];
 
@@ -191,7 +302,40 @@ void GraphKit::runDp(bool multithreading, bool bound, int calculation)
     int peakMemory = 0;
 
     time_t startTime = clock();
-    dp(currentMemory, peakMemory, multithreading, bound, calculation);
+    if (!softBudget)
+    {
+        dp(currentMemory, peakMemory, multithreading, bound, calculation);
+    }
+    else
+    {
+        int FLAG = NO_SOLUTION;
+        int budgetLast = memory;
+        int budgetCurrent = budgetLast;
+        time_t startTimeSoftBudget = clock();
+        FLAG = dpSoftBudget(currentMemory, peakMemory, multithreading, bound, calculation, budgetCurrent, startTimeSoftBudget);
+
+        /*
+            Execute dp with soft budget (binary search)
+        */
+
+        int iteration = 0;
+        while (FLAG != SOLUTION && iteration++ < softBudgetBinarySearchIteration)
+        {
+            if (FLAG == TIMEOUT)
+            {
+                budgetLast = budgetCurrent;
+                budgetCurrent = budgetLast / 2;
+            }
+            if (FLAG == NO_SOLUTION)
+            {
+                budgetCurrent = (budgetLast + budgetCurrent) / 2;
+            }
+
+            startTimeSoftBudget = clock();
+            FLAG = dpSoftBudget(currentMemory, peakMemory, multithreading, bound, calculation, budgetCurrent, startTimeSoftBudget);
+            std::cout << "Budget: " << budgetCurrent << "Flag: " << FLAG << std::endl;
+        }
+    }
     time_t endTime = clock();
 
     dpTime = (double)(endTime - startTime) / CLOCKS_PER_SEC;
@@ -224,4 +368,24 @@ void GraphKit::printDpSequence()
     }
     std::cout << "}" << std::endl
               << std::endl;
+}
+
+void GraphKit::setSoftBudgetBinarySearchIteration(int softBudgetBinarySearchIteration)
+{
+    this->softBudgetBinarySearchIteration = softBudgetBinarySearchIteration;
+}
+
+void GraphKit::setMaximumTime(double maximumTime)
+{
+    this->maximumTime = maximumTime;
+}
+
+int GraphKit::getSoftBudgetBinarySearchIteration()
+{
+    return softBudgetBinarySearchIteration;
+}
+
+double GraphKit::getMaximumTime()
+{
+    return maximumTime;
 }

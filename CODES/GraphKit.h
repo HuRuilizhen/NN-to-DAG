@@ -7,6 +7,12 @@
 class GraphKit
 {
 private:
+    const int TIMEOUT = -1;
+    const int NO_SOLUTION = 0;
+    const int SOLUTION = 1;
+    int softBudgetBinarySearchIteration = 20;
+    double maximumTime = 60.0;
+
     Graph graph;
     int *inDegree;
     int *outDegree;
@@ -55,6 +61,7 @@ private:
     void idfs(int node, int &currentMemory, int &peakMemory, int *copyIndegree, int &cnt, Graph *newGraph);
     void greedy(int &currentMemory, int &peakMemory, int *copyIndegree);
     void dp(int &currentMemory, int &peakMemory, bool multithreading, bool bound, int calculation);
+    int dpSoftBudget(int &currentMemory, int &peakMemory, bool multithreading, bool bound, int calculation, int budget, time_t startTime);
 
 public:
     /*
@@ -64,16 +71,24 @@ public:
     GraphKit(Graph graph);
 
     /*
-    the method to run algorithms and recode the results of the peak memory
+    the setter and getter methods of parameters
+    */
+    void setSoftBudgetBinarySearchIteration(int softBudgetBinarySearchIteration);
+    void setMaximumTime(double maximumTime);
+    int getSoftBudgetBinarySearchIteration();
+    double getMaximumTime();
+
+    /*
+    the methods to run algorithms and recode the results of the peak memory
     */
     void runDfs();
     void runIdfs();
     void runGreedy();
-    void runDp(bool multithreading, bool bound, int calculation);
+    void runDp(bool multithreading, bool bound, bool softBudget, int calculation);
     void runMaxcut();
 
     /*
-    the method to get or print the result
+    the methods to get or print the result
     */
     int getDfsMemory();
     double getDfsTime();
