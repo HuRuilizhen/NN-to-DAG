@@ -21,8 +21,8 @@ int main(int argc, char const *argv[])
     graphKit.runIdfs();
     graphKit.runIdfs();
     graphKit.runGreedy();
-    graphKit.runDp(false, true, 20);
-    graphKit.printResultCSV();
-
+    graphKit.runDp(false, true, false, -1);
+    graphKit.printResult();
+    graphKit.printDpIterationMemory();
     return 0;
 }

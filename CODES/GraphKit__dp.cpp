@@ -169,6 +169,8 @@ void GraphKit::dp(int &currentMemory, int &peakMemory, bool multithreading, bool
                     thread.join();
         }
 
+        iterationMemory.push_back(getProcessMemory());
+
         lastMemoization = currentMemoization;
         currentMemoization.clear();
     }
@@ -333,7 +335,6 @@ void GraphKit::runDp(bool multithreading, bool bound, bool softBudget, int calcu
 
             startTimeSoftBudget = clock();
             FLAG = dpSoftBudget(currentMemory, peakMemory, multithreading, bound, calculation, budgetCurrent, startTimeSoftBudget);
-            std::cout << "Budget: " << budgetCurrent << "Flag: " << FLAG << std::endl;
         }
     }
     time_t endTime = clock();
@@ -364,6 +365,19 @@ void GraphKit::printDpSequence()
     {
         std::cout << *(dpSequence + i);
         if (i != graph.getNumNodes() - 1)
+            std::cout << ", ";
+    }
+    std::cout << "}" << std::endl
+              << std::endl;
+}
+
+void GraphKit::printDpIterationMemory()
+{
+    std::cout << "dp iteration memory: {";
+    for (int i = 0; i < iterationMemory.size(); i++)
+    {
+        std::cout << iterationMemory[i];
+        if (i != iterationMemory.size() - 1)
             std::cout << ", ";
     }
     std::cout << "}" << std::endl
