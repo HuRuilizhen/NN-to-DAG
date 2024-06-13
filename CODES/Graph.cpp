@@ -75,19 +75,6 @@ int Graph::getEdgeWeight(int edge)
     return edgeWeight[edge];
 }
 
-int Graph::getweightfromto(int from, int to)
-{
-    int result;
-    for (int edge = getEdgeHead(from); isValid(edge); edge = getEdgeNext(edge))
-        {
-            if(getEdgeTo(edge)==to){
-                result = getEdgeWeight(edge);
-                break;
-            }
-        }
-    return result;
-}
-
 bool Graph::isValid(int edge)
 {
     if (edge == -1)
@@ -107,4 +94,3 @@ void Graph::print()
         std::cout << std::endl;
     }
 }
-

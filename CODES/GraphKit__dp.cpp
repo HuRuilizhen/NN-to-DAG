@@ -27,6 +27,16 @@ namespace GraphKitDp
         int peak_memory;
     };
 
+    struct State
+    {
+        std::set<int> candidate;
+        Memoization memoization;
+        bool operator<(const State &other) const
+        {
+            return memoization.current_memory < memoization.current_memory;
+        }
+    };
+
     void numThreadsAliveIncrement()
     {
         std::lock_guard<std::mutex> lock(numThreadsAliveMutex);
@@ -121,33 +131,26 @@ void GraphKit::dp(int &currentMemory, int &peakMemory, bool multithreading, bool
     {
         std::vector<std::thread> threads;
         std::map<std::set<int>, GraphKitDp::Memoization>::iterator it;
-        std::priority_queue<int> heap;
-        std::set<int> set;
+        std::priority_queue<GraphKitDp::State> stateHeap;
 
         for (it = lastMemoization.begin(); it != lastMemoization.end(); it++)
         {
-            if (heap.size() < calculation)
-                heap.push(it->second.current_memory);
-            else if (heap.top() > it->second.current_memory)
+            if (stateHeap.size() < calculation)
+                stateHeap.push({it->first, it->second});
+            else if (stateHeap.top().memoization.current_memory > it->second.current_memory)
             {
-                heap.pop();
-                heap.push(it->second.current_memory);
+                stateHeap.pop();
+                stateHeap.push({it->first, it->second});
             }
         }
 
-        while (heap.size())
+        while (!stateHeap.empty())
         {
-            set.insert(heap.top());
-            heap.pop();
-        }
+            GraphKitDp::State state = stateHeap.top();
+            stateHeap.pop();
 
-        for (it = lastMemoization.begin(); it != lastMemoization.end(); it++)
-        {
-            if (set.find(it->second.current_memory) == set.end())
-                continue;
-
-            std::set<int> currentCandidate = it->first;
-            GraphKitDp::Memoization memoization = it->second;
+            std::set<int> currentCandidate = state.candidate;
+            GraphKitDp::Memoization memoization = state.memoization;
             std::vector<int> currentSchedule = memoization.schedule;
             std::vector<int> currentIndegree = memoization.indegree;
             int currentMemory = memoization.current_memory;
@@ -220,55 +223,46 @@ int GraphKit::dpSoftBudget(int &currentMemory, int &peakMemory, bool multithread
     {
         std::vector<std::thread> threads;
         std::map<std::set<int>, GraphKitDp::Memoization>::iterator it;
-        std::priority_queue<int> heap;
-        std::set<int> set;
+        std::priority_queue<GraphKitDp::State> stateHeap;
 
         for (it = lastMemoization.begin(); it != lastMemoization.end(); it++)
         {
-            if (heap.size() < calculation)
-                heap.push(it->second.current_memory);
-            else if (heap.top() > it->second.current_memory)
+            if (stateHeap.size() < calculation)
+                stateHeap.push({it->first, it->second});
+            else if (stateHeap.top().memoization.current_memory > it->second.current_memory)
             {
-                heap.pop();
-                heap.push(it->second.current_memory);
+                stateHeap.pop();
+                stateHeap.push({it->first, it->second});
             }
         }
 
-        while (heap.size())
-        {
-            set.insert(heap.top());
-            heap.pop();
-        }
-
-        if (lastMemoization.empty())
+        if (stateHeap.empty())
             return NO_SOLUTION;
 
-        for (it = lastMemoization.begin(); it != lastMemoization.end(); it++)
+        while (!stateHeap.empty())
         {
-            if (set.find(it->second.current_memory) == set.end())
-                continue;
+            GraphKitDp::State state = stateHeap.top();
+            stateHeap.pop();
 
-            /* Record current running time */
-            time_t endTime = clock();
-            double runningTime = (double)(endTime - startTime) / CLOCKS_PER_SEC;
-            if (runningTime > maximumTime)
-                return TIMEOUT;
-
-            /*
-                Execute stage calculation
-            */
-
-            std::set<int> currentCandidate = it->first;
-            GraphKitDp::Memoization memoization = it->second;
+            std::set<int> currentCandidate = state.candidate;
+            GraphKitDp::Memoization memoization = state.memoization;
             std::vector<int> currentSchedule = memoization.schedule;
             std::vector<int> currentIndegree = memoization.indegree;
             int currentMemory = memoization.current_memory;
             int peakMemory = memoization.peak_memory;
 
+            /*
+                Record current running time
+            */
+            time_t endTime = clock();
+            double runningTime = (double)(endTime - startTime) / CLOCKS_PER_SEC;
+            if (runningTime > maximumTime)
+                return TIMEOUT;
+
             if (multithreading)
-                threads.emplace_back(GraphKitDp::stageCalculation, currentCandidate, currentSchedule, currentIndegree, std::ref(currentMemoization), currentMemory, peakMemory, graph, inSum, outSum, budget);
+                threads.emplace_back(GraphKitDp::stageCalculation, currentCandidate, currentSchedule, currentIndegree, std::ref(currentMemoization), currentMemory, peakMemory, graph, inSum, outSum, boundPeakMemory);
             else
-                GraphKitDp::stageCalculation(currentCandidate, currentSchedule, currentIndegree, currentMemoization, currentMemory, peakMemory, graph, inSum, outSum, budget);
+                GraphKitDp::stageCalculation(currentCandidate, currentSchedule, currentIndegree, currentMemoization, currentMemory, peakMemory, graph, inSum, outSum, boundPeakMemory);
         }
 
         if (multithreading)

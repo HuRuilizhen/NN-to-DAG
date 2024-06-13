@@ -70,9 +70,9 @@ void GraphKit::load(Graph graph)
 
     for (int node = 0; node < graph.getNumNodes(); node++)
     {
-        if (inDegree[node] == 0 && outDegree[node] != 0)
+        if (inDegree[node] == 0)
             numStartNodes++;
-        if (outDegree[node] == 0 && inDegree[node] != 0)
+        if (outDegree[node] == 0)
             numEndNodes++;
     }
 
@@ -84,9 +84,9 @@ void GraphKit::load(Graph graph)
 
     for (int node = 0; node < graph.getNumNodes(); node++)
     {
-        if (inDegree[node] == 0 && outDegree[node] != 0)
+        if (inDegree[node] == 0)
             startNodes[startNodesCounter++] = node;
-        if (outDegree[node] == 0 && inDegree[node] != 0)
+        if (outDegree[node] == 0)
             endNodes[endNodesCounter++] = node;
     }
 }

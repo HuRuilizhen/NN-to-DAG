@@ -5,3 +5,5 @@
 **/main.exe
 
 *.in
+
+*.out
