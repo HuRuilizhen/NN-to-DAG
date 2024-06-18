@@ -167,20 +167,10 @@ void GraphKit::dp(int &currentMemory, int &peakMemory, bool multithreading, bool
         std::priority_queue<GraphKitDp::State> stateHeap;
 
         for (it = lastMemoization.begin(); it != lastMemoization.end(); it++)
-        {
-            if (stateHeap.size() < calculation)
-                stateHeap.push({it->first, it->second});
-            else if (stateHeap.top().memoization.current_memory > it->second.current_memory)
-            {
-                stateHeap.pop();
-                stateHeap.push({it->first, it->second});
-            }
-        }
+            stateHeap.push({it->first, it->second});
 
-        stateHeap.push(lastGuideState);
-        currentGuideState = GraphKitDp::currentGuideStateCalculation(lastGuideState, bestSequence[i], graph, inSum, outSum);
-        lastGuideState = currentGuideState;
-
+        int stateCounter = 0;
+        int delta = 0;
         while (!stateHeap.empty())
         {
             GraphKitDp::State state = stateHeap.top();
@@ -197,8 +187,38 @@ void GraphKit::dp(int &currentMemory, int &peakMemory, bool multithreading, bool
                 threads.emplace_back(GraphKitDp::stageCalculation, currentCandidate, currentSchedule, currentIndegree, std::ref(currentMemoization), currentMemory, peakMemory, graph, inSum, outSum, boundPeakMemory);
             else
                 GraphKitDp::stageCalculation(currentCandidate, currentSchedule, currentIndegree, currentMemoization, currentMemory, peakMemory, graph, inSum, outSum, boundPeakMemory);
+
+            stateCounter++;
+            if (stateCounter >= calculation + delta)
+            {
+                if (!currentMemoization.empty())
+                    break;
+            }
         }
 
+        /*
+            if necessary, add the guide state
+        */
+        if (currentMemoization.empty())
+        {
+            std::set<int> currentCandidate = lastGuideState.candidate;
+            GraphKitDp::Memoization memoization = lastGuideState.memoization;
+            std::vector<int> currentSchedule = memoization.schedule;
+            std::vector<int> currentIndegree = memoization.indegree;
+            int currentMemory = memoization.current_memory;
+            int peakMemory = memoization.peak_memory;
+
+            if (multithreading)
+                threads.emplace_back(GraphKitDp::stageCalculation, currentCandidate, currentSchedule, currentIndegree, std::ref(currentMemoization), currentMemory, peakMemory, graph, inSum, outSum, boundPeakMemory);
+            else
+                GraphKitDp::stageCalculation(currentCandidate, currentSchedule, currentIndegree, currentMemoization, currentMemory, peakMemory, graph, inSum, outSum, boundPeakMemory);
+        }
+        currentGuideState = GraphKitDp::currentGuideStateCalculation(lastGuideState, bestSequence[i], graph, inSum, outSum);
+        lastGuideState = currentGuideState;
+
+        /*
+            wait for threads to finish
+        */
         if (multithreading)
         {
             std::unique_lock<std::mutex> lock(GraphKitDp::mutex);
