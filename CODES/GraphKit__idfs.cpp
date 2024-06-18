@@ -5,7 +5,7 @@
 
 void GraphKit::idfs(int node, int &currentMemory, int &peakMemory, int *copyInDegree, int &cnt, Graph *newGraph)
 {
-    *(idfsSequence + cnt) = node;
+    *(idfsSequence + newGraph->getNumNodes() - cnt - 1) = node;
     currentMemory += -outSum[node] + inSum[node];
     if (peakMemory < currentMemory)
         peakMemory = currentMemory;
@@ -52,9 +52,15 @@ void GraphKit::runIdfs()
 
     idfsMemory = peakMemory;
     if (memory == -1)
+    {
         memory = idfsMemory;
+        memcpy(bestSequence, idfsSequence, sizeof(int) * graph.getNumNodes());
+    }
     else if (memory > idfsMemory)
+    {
         memory = idfsMemory;
+        memcpy(bestSequence, idfsSequence, sizeof(int) * graph.getNumNodes());
+    }
 }
 
 int GraphKit::getIdfsMemory()
@@ -67,15 +73,21 @@ double GraphKit::getIdfsTime()
     return idfsTime;
 }
 
+int *GraphKit::getIdfsSequence()
+{
+    int *sequence = new int[graph.getNumNodes()];
+    memcpy(sequence, idfsSequence, sizeof(int) * graph.getNumNodes());
+    return sequence;
+}
+
 void GraphKit::printIdfsSequence()
 {
     std::cout << "idfs sequence: {";
     for (int i = 0; i < graph.getNumNodes(); i++)
     {
-        std::cout << *(idfsSequence + graph.getNumNodes() - i - 1);
+        std::cout << *(idfsSequence + i);
         if (i != graph.getNumNodes() - 1)
             std::cout << ", ";
     }
-    std::cout << "}" << std::endl
-              << std::endl;
+    std::cout << "}" << std::endl;
 }

@@ -42,6 +42,7 @@ void GraphKit::load(Graph graph)
     outDegree = new int[graph.getNumNodes()];
     inSum = new int[graph.getNumNodes()];
     outSum = new int[graph.getNumNodes()];
+    bestSequence = new int[graph.getNumNodes()];
     numStartNodes = 0;
     numEndNodes = 0;
 
@@ -94,6 +95,21 @@ void GraphKit::load(Graph graph)
 int GraphKit::getMemory()
 {
     return memory;
+}
+
+int *GraphKit::getBestSequence()
+{
+    int *sequence = new int[graph.getNumNodes()];
+    memcpy(sequence, bestSequence, sizeof(int) * graph.getNumNodes());
+    return sequence;
+}
+
+void GraphKit::printBestSequence()
+{
+    std::cout << "Best Sequence: {";
+    for (int i = 0; i < graph.getNumNodes(); i++)
+        std::cout << *(bestSequence + i) << " ";
+    std::cout << "}" << std::endl;
 }
 
 void GraphKit::printResult()

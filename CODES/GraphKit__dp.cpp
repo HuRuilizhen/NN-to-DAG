@@ -37,6 +37,36 @@ namespace GraphKitDp
         }
     };
 
+    State currentGuideStateCalculation(State lastGuideState, int candidateNode, Graph &graph, int *inSum, int *outSum)
+    {
+        State currentGuideState;
+        std::set<int> newCandidate = lastGuideState.candidate;
+        std::vector<int> newSchedule = lastGuideState.memoization.schedule;
+        std::vector<int> newIndegree = lastGuideState.memoization.indegree;
+        newCandidate.erase(candidateNode);
+        newSchedule.push_back(candidateNode);
+
+        int newcurrentMemory = lastGuideState.memoization.current_memory + outSum[candidateNode] - inSum[candidateNode];
+        int peakMemory = std::max(newcurrentMemory, lastGuideState.memoization.peak_memory);
+
+        for (int edge = graph.getEdgeHead(candidateNode); graph.isValid(edge); edge = graph.getEdgeNext(edge))
+        {
+            int to = graph.getEdgeTo(edge);
+            newIndegree[to]--;
+            if (newIndegree[to] == 0)
+            {
+                newCandidate.insert(to);
+            }
+        }
+
+        currentGuideState.candidate = newCandidate;
+        currentGuideState.memoization.schedule = newSchedule;
+        currentGuideState.memoization.indegree = newIndegree;
+        currentGuideState.memoization.current_memory = newcurrentMemory;
+        currentGuideState.memoization.peak_memory = peakMemory;
+        return currentGuideState;
+    }
+
     void numThreadsAliveIncrement()
     {
         std::lock_guard<std::mutex> lock(numThreadsAliveMutex);
@@ -108,6 +138,8 @@ void GraphKit::dp(int &currentMemory, int &peakMemory, bool multithreading, bool
 
     std::map<std::set<int>, GraphKitDp::Memoization> lastMemoization;
     std::map<std::set<int>, GraphKitDp::Memoization> currentMemoization;
+    GraphKitDp::State lastGuideState;
+    GraphKitDp::State currentGuideState;
 
     /*
         Initialize Memoization related variables
@@ -123,6 +155,7 @@ void GraphKit::dp(int &currentMemory, int &peakMemory, bool multithreading, bool
     for (int node = 0; node < graph.getNumNodes(); node++)
         initIndegree.push_back(inDegree[node]);
     lastMemoization.emplace(initCandidate, GraphKitDp::Memoization{initSchedule, initIndegree, 0, 0});
+    lastGuideState = GraphKitDp::State{initCandidate, GraphKitDp::Memoization{initSchedule, initIndegree, 0, 0}};
 
     /*
         Execute dynamic programming
@@ -143,6 +176,10 @@ void GraphKit::dp(int &currentMemory, int &peakMemory, bool multithreading, bool
                 stateHeap.push({it->first, it->second});
             }
         }
+
+        stateHeap.push(lastGuideState);
+        currentGuideState = GraphKitDp::currentGuideStateCalculation(lastGuideState, bestSequence[i], graph, inSum, outSum);
+        lastGuideState = currentGuideState;
 
         while (!stateHeap.empty())
         {
@@ -337,9 +374,15 @@ void GraphKit::runDp(bool multithreading, bool bound, bool softBudget, int calcu
 
     dpMemory = peakMemory;
     if (memory == -1)
+    {
         memory = dpMemory;
+        memcpy(bestSequence, dpSequence, sizeof(int) * graph.getNumNodes());
+    }
     else if (memory > dpMemory)
+    {
         memory = dpMemory;
+        memcpy(bestSequence, dpSequence, sizeof(int) * graph.getNumNodes());
+    }
 }
 
 int GraphKit::getDpMemory()
@@ -350,6 +393,13 @@ int GraphKit::getDpMemory()
 double GraphKit::getDpTime()
 {
     return dpTime;
+}
+
+int *GraphKit::getDpSequence()
+{
+    int *sequence = new int[graph.getNumNodes()];
+    std::memcpy(sequence, dpSequence, sizeof(dpSequence[0]) * graph.getNumNodes());
+    return sequence;
 }
 
 void GraphKit::printDpSequence()

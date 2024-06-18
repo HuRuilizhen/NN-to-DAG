@@ -41,9 +41,15 @@ void GraphKit::runDfs()
     dfsMemory = peakMemory;
 
     if (memory == -1)
+    {
         memory = dfsMemory;
+        memcpy(bestSequence, dfsSequence, sizeof(int) * graph.getNumNodes());
+    }
     else if (memory > dfsMemory)
+    {
         memory = dfsMemory;
+        memcpy(bestSequence, dfsSequence, sizeof(int) * graph.getNumNodes());
+    }
 }
 
 int GraphKit::getDfsMemory()
@@ -54,6 +60,13 @@ int GraphKit::getDfsMemory()
 double GraphKit::getDfsTime()
 {
     return dfsTime;
+}
+
+int *GraphKit::getDfsSequence()
+{
+    int *sequence = new int[graph.getNumNodes()];
+    memcpy(sequence, dfsSequence, sizeof(int) * graph.getNumNodes());
+    return sequence;
 }
 
 void GraphKit::printDfsSequence()

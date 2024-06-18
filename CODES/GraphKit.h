@@ -46,6 +46,7 @@ private:
     std::vector<int> topological_cut;
     int maxcutMemory;
     int memory;
+    int *bestSequence;
 
     void load(Graph graph);
     double getProcessMemory();
@@ -95,18 +96,22 @@ public:
     */
     int getDfsMemory();
     double getDfsTime();
+    int *getDfsSequence();
     void printDfsSequence();
 
     int getIdfsMemory();
     double getIdfsTime();
+    int *getIdfsSequence();
     void printIdfsSequence();
 
     int getGreedyMemory();
     double getGreedyTime();
+    int *getGreedySequence();
     void printGreedySequence();
 
     int getDpMemory();
     double getDpTime();
+    int *getDpSequence();
     void printDpSequence();
     void printDpIterationMemory();
 
@@ -114,6 +119,8 @@ public:
     std::vector<int> RESPECTORDER(std::vector<int> sequential_schedule);
 
     int getMemory();
+    int *getBestSequence();
+    void printBestSequence();
     void printResult();
     void printResultCSV();
 };

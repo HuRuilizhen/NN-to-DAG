@@ -74,9 +74,15 @@ void GraphKit::runGreedy()
 
     greedyMemory = peakMemory;
     if (memory == -1)
+    {
         memory = greedyMemory;
+        memcpy(bestSequence, greedySequence, sizeof(int) * graph.getNumNodes());
+    }
     else if (memory > greedyMemory)
+    {
         memory = greedyMemory;
+        memcpy(bestSequence, greedySequence, sizeof(int) * graph.getNumNodes());
+    }
 }
 
 int GraphKit::getGreedyMemory()
@@ -87,6 +93,13 @@ int GraphKit::getGreedyMemory()
 double GraphKit::getGreedyTime()
 {
     return greedyTime;
+}
+
+int *GraphKit::getGreedySequence()
+{
+    int *sequence = new int[graph.getNumNodes()];
+    memcpy(sequence, greedySequence, sizeof(int) * graph.getNumNodes());
+    return sequence;
 }
 
 void GraphKit::printGreedySequence()
